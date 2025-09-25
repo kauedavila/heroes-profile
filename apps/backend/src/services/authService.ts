@@ -22,22 +22,24 @@ export class AuthService {
       vipLevel: user.vipLevel,
     };
 
-    return jwt.sign(payload, JWT_SECRET as string, {
+    // @ts-ignore
+    return jwt.sign(payload, JWT_SECRET, {
       expiresIn: JWT_EXPIRES_IN,
     });
   }
 
   static generateRefreshToken(user: IUser): string {
+    // @ts-ignore
     return jwt.sign(
       { userId: user._id.toString() },
-      JWT_REFRESH_SECRET as string,
+      JWT_REFRESH_SECRET,
       { expiresIn: JWT_REFRESH_EXPIRES_IN }
     );
   }
 
   static verifyAccessToken(token: string): TokenPayload | null {
     try {
-      return jwt.verify(token, JWT_SECRET as string) as TokenPayload;
+      return jwt.verify(token, JWT_SECRET) as TokenPayload;
     } catch (error) {
       return null;
     }
@@ -45,7 +47,7 @@ export class AuthService {
 
   static verifyRefreshToken(token: string): { userId: string } | null {
     try {
-      return jwt.verify(token, JWT_REFRESH_SECRET as string) as { userId: string };
+      return jwt.verify(token, JWT_REFRESH_SECRET) as { userId: string };
     } catch (error) {
       return null;
     }
