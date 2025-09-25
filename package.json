@@ -1,0 +1,26 @@
+{
+  "name": "heroes-profile",
+  "version": "1.0.0",
+  "description": "Horizontal RPG Game with MERN Stack",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:mobile\"",
+    "dev:backend": "npm run dev --workspace=@heroes-profile/backend",
+    "dev:mobile": "npm run dev --workspace=@heroes-profile/mobile",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "typescript": "^5.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}
