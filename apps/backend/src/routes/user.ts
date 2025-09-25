@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
 import User from '../models/User';
 import { authenticate, requireRole, requireVip, AuthRequest } from '../middleware/auth';
@@ -6,7 +6,7 @@ import { authenticate, requireRole, requireVip, AuthRequest } from '../middlewar
 const router = express.Router();
 
 // Get user profile
-router.get('/profile', authenticate, (req: AuthRequest, res) => {
+router.get('/profile', authenticate, (req: AuthRequest, res: Response) => {
   if (!req.user) {
     return res.status(401).json({ message: 'User not found' });
   }

@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
 import User from '../models/User';
 import { AuthService } from '../services/authService';
@@ -11,7 +11,7 @@ router.post('/register', [
   body('email').isEmail().normalizeEmail(),
   body('password').isLength({ min: 6 }),
   body('name').trim().isLength({ min: 2 }),
-], async (req, res) => {
+], async (req: Request, res: Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -61,7 +61,7 @@ router.post('/register', [
 router.post('/login', [
   body('email').isEmail().normalizeEmail(),
   body('password').exists(),
-], async (req, res) => {
+], async (req: Request, res: Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -106,7 +106,7 @@ router.post('/login', [
 });
 
 // Refresh token
-router.post('/refresh', async (req, res) => {
+router.post('/refresh', async (req: Request, res: Response) => {
   try {
     const { refreshToken } = req.body;
 
@@ -141,7 +141,7 @@ router.post('/refresh', async (req, res) => {
 });
 
 // Logout
-router.post('/logout', authenticate, async (req: AuthRequest, res) => {
+router.post('/logout', authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const { refreshToken } = req.body;
     
@@ -157,7 +157,7 @@ router.post('/logout', authenticate, async (req: AuthRequest, res) => {
 });
 
 // Logout all devices
-router.post('/logout-all', authenticate, async (req: AuthRequest, res) => {
+router.post('/logout-all', authenticate, async (req: AuthRequest, res: Response) => {
   try {
     if (req.user) {
       await AuthService.revokeAllRefreshTokens(req.user);
@@ -171,7 +171,7 @@ router.post('/logout-all', authenticate, async (req: AuthRequest, res) => {
 });
 
 // Get current user
-router.get('/me', authenticate, (req: AuthRequest, res) => {
+router.get('/me', authenticate, (req: AuthRequest, res: Response) => {
   if (!req.user) {
     return res.status(401).json({ message: 'User not found' });
   }
