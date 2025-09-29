@@ -1,5 +1,5 @@
 import { Monster, GameMap, WorldMap } from '../types/game';
-import { YamlLoader } from './yamlLoader';
+import { DataLoader } from './dataLoader';
 
 export class GameDataService {
   private monstersData: Monster[] | null = null;
@@ -24,7 +24,7 @@ export class GameDataService {
     }
 
     try {
-      this.monstersData = await YamlLoader.loadMonsters();
+      this.monstersData = await DataLoader.loadMonsters();
       return this.monstersData;
     } catch (error) {
       console.error('Error loading monsters:', error);
@@ -38,7 +38,7 @@ export class GameDataService {
     }
 
     try {
-      this.mapsData = await YamlLoader.loadMaps();
+      this.mapsData = await DataLoader.loadMaps();
       return this.mapsData;
     } catch (error) {
       console.error('Error loading maps:', error);
@@ -52,7 +52,7 @@ export class GameDataService {
     }
 
     try {
-      this.worldMapData = await YamlLoader.loadWorldMap();
+      this.worldMapData = await DataLoader.loadWorldMap();
       return this.worldMapData;
     } catch (error) {
       console.error('Error loading world map:', error);
@@ -83,9 +83,9 @@ export class GameDataService {
     ]);
   }
 
-  // Static factory method to create a service instance with YAML data
-  static async createFromYaml(): Promise<GameDataService> {
-    const data = await YamlLoader.loadAllData();
+  // Static factory method to create a service instance with data
+  static async createFromData(): Promise<GameDataService> {
+    const data = await DataLoader.loadAllData();
     return new GameDataService(data);
   }
 }
