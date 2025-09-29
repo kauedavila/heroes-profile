@@ -1,4 +1,24 @@
-import { Monster } from '../types/game';
+/**
+ * monsters.ts
+ *
+ * Este arquivo exporta o array MONSTERS contendo todos os monstros do jogo.
+ * Cada objeto do array representa um monstro enfrentado nas batalhas.
+ *
+ * Estrutura de cada monstro:
+ * - id: Identificador único do monstro
+ * - name: Nome exibido
+ * - image: Nome do arquivo de imagem do monstro
+ * - level: Nível do monstro
+ * - stats: Atributos (hp, attack, defense, speed, magic)
+ * - abilities: Lista de habilidades
+ * - rewards: Recompensas ao derrotar (ouro, experiência)
+ * - dropItems: Lista de itens que podem ser dropados (com chance)
+ *
+ * Para adicionar novos monstros, basta incluir um novo objeto ao array MONSTERS.
+ * Este arquivo é utilizado pelo sistema de dados do jogo para gerar batalhas e recompensas.
+ */
+
+import { Monster } from "../types/game";
 
 export const MONSTERS: Monster[] = [
   {
@@ -11,17 +31,17 @@ export const MONSTERS: Monster[] = [
       attack: 12,
       defense: 8,
       speed: 15,
-      magic: 2
+      magic: 2,
     },
     abilities: ["Slash", "Guard"],
     rewards: {
       gold: 25,
-      experience: 30
+      experience: 30,
     },
     dropItems: [
       { item: "rusty_sword", chance: 0.1 },
-      { item: "healing_potion", chance: 0.3 }
-    ]
+      { item: "healing_potion", chance: 0.3 },
+    ],
   },
   {
     id: "orc_01",
@@ -33,17 +53,17 @@ export const MONSTERS: Monster[] = [
       attack: 18,
       defense: 12,
       speed: 8,
-      magic: 0
+      magic: 0,
     },
     abilities: ["Heavy Strike", "Intimidate", "Berserk"],
     rewards: {
       gold: 45,
-      experience: 55
+      experience: 55,
     },
     dropItems: [
       { item: "iron_axe", chance: 0.15 },
-      { item: "leather_armor", chance: 0.2 }
-    ]
+      { item: "leather_armor", chance: 0.2 },
+    ],
   },
   {
     id: "skeleton_01",
@@ -55,17 +75,17 @@ export const MONSTERS: Monster[] = [
       attack: 16,
       defense: 6,
       speed: 20,
-      magic: 5
+      magic: 5,
     },
     abilities: ["Arrow Shot", "Bone Throw", "Poison Arrow"],
     rewards: {
       gold: 35,
-      experience: 40
+      experience: 40,
     },
     dropItems: [
       { item: "bone_bow", chance: 0.12 },
-      { item: "antidote", chance: 0.25 }
-    ]
+      { item: "antidote", chance: 0.25 },
+    ],
   },
   {
     id: "fire_elemental_01",
@@ -77,17 +97,17 @@ export const MONSTERS: Monster[] = [
       attack: 25,
       defense: 10,
       speed: 12,
-      magic: 30
+      magic: 30,
     },
     abilities: ["Fireball", "Flame Burst", "Ignite", "Fire Shield"],
     rewards: {
       gold: 75,
-      experience: 85
+      experience: 85,
     },
     dropItems: [
       { item: "fire_gem", chance: 0.2 },
-      { item: "flame_staff", chance: 0.08 }
-    ]
+      { item: "flame_staff", chance: 0.08 },
+    ],
   },
   {
     id: "dragon_01",
@@ -99,17 +119,23 @@ export const MONSTERS: Monster[] = [
       attack: 45,
       defense: 25,
       speed: 18,
-      magic: 40
+      magic: 40,
     },
-    abilities: ["Dragon Breath", "Claw Strike", "Wing Gust", "Roar", "Fire Storm"],
+    abilities: [
+      "Dragon Breath",
+      "Claw Strike",
+      "Wing Gust",
+      "Roar",
+      "Fire Storm",
+    ],
     rewards: {
       gold: 200,
-      experience: 250
+      experience: 250,
     },
     dropItems: [
       { item: "dragon_scale", chance: 0.3 },
       { item: "dragon_sword", chance: 0.05 },
-      { item: "rare_gem", chance: 0.15 }
-    ]
-  }
+      { item: "rare_gem", chance: 0.15 },
+    ],
+  },
 ];
