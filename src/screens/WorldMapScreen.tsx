@@ -168,7 +168,7 @@ export const WorldMapScreen: React.FC<WorldMapScreenProps> = ({
 
   return (
     <ImageBackground
-      source={{ uri: "../assets/worldmap.png" }}
+      source={require("../../assets/worldmap.png")}
       style={styles.container}
     >
       <View style={styles.overlay}>
