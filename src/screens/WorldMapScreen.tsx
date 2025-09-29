@@ -241,27 +241,6 @@ export const WorldMapScreen: React.FC<WorldMapScreenProps> = ({
             })}
           </View>
         </ScrollView>
-
-        <View style={styles.legend}>
-          <View style={styles.legendItem}>
-            <View
-              style={[styles.legendColor, { backgroundColor: "#FFD700" }]}
-            />
-            <Text style={styles.legendText}>Available</Text>
-          </View>
-          <View style={styles.legendItem}>
-            <View
-              style={[styles.legendColor, { backgroundColor: "#32CD32" }]}
-            />
-            <Text style={styles.legendText}>Completed</Text>
-          </View>
-          <View style={styles.legendItem}>
-            <View
-              style={[styles.legendColor, { backgroundColor: "#696969" }]}
-            />
-            <Text style={styles.legendText}>Locked</Text>
-          </View>
-        </View>
       </View>
     </ImageBackground>
   );
