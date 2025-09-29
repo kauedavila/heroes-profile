@@ -19,27 +19,19 @@
 
 maps:
   # Monster Maps
-  - id: "ice_dungeon"
+  - id: "ice_dungeon_01"
     name: "Ice Dungeon"
     type: "monster"
-    description: "A cold and treacherous dungeon filled with ice monsters. Some strange light shines from the inside."
-    backgroundImage: "ice.png"
-    difficulty: 2
-    rounds: 3
+    description: "Entrance to the icy dungeon filled with ice monsters."
+    backgroundImage: "ice_01.png"
+    difficulty: 1
+    rounds: 1
     monsters:
       - id: "goblin_01"
         quantity: 2
         round: 1
-      - id: "goblin_01"
-        quantity: 3
-        round: 2
-      - id: "goblin_01"
-        quantity: 1
-        round: 3
-        boss: true
     rewards:
       gold: 150
       experience: 200
       items:
-        - "basic_sword"
         - "leather_vest"

@@ -34,77 +34,10 @@ worldMap:
         y: 200
       unlocked: true
       maps:
-        - "plains_monsters_01"
-        - "village_recruitment_01"
+        - "ice_dungeon_01"
+        - "ice_dungeon_02"
 
-    - id: "dark_forest"
-      name: "Dark Forest"
-      description: "Ancient woods where shadows hide dangerous creatures"
-      position:
-        x: 300
-        y: 150
-      unlocked: false
-      unlockRequirement:
-        completedMaps: ["plains_monsters_01"]
-        playerLevel: 3
-      maps:
-        - "forest_monsters_01"
-        - "forest_monsters_02"
-        - "druid_recruitment_01"
-
-    - id: "mountain_peaks"
-      name: "Mountain Peaks"
-      description: "Treacherous mountains home to powerful beasts"
-      position:
-        x: 500
-        y: 100
-      unlocked: false
-      unlockRequirement:
-        completedMaps: ["forest_monsters_02"]
-        playerLevel: 5
-      maps:
-        - "mountain_monsters_01"
-        - "dwarven_recruitment_01"
-
-    - id: "volcanic_crater"
-      name: "Volcanic Crater"
-      description: "A fiery hellscape where only the bravest dare venture"
-      position:
-        x: 400
-        y: 50
-      unlocked: false
-      unlockRequirement:
-        completedMaps: ["mountain_monsters_01"]
-        playerLevel: 8
-      maps:
-        - "volcano_monsters_01"
-        - "fire_temple_recruitment_01"
-
-    - id: "ancient_ruins"
-      name: "Ancient Ruins"
-      description: "Mysterious ruins that hold secrets of the past"
-      position:
-        x: 200
-        y: 300
-      unlocked: false
-      unlockRequirement:
-        completedMaps: ["dark_forest_all"]
-        playerLevel: 6
-      maps:
-        - "ruins_monsters_01"
-        - "ruins_monsters_02"
-        - "ancient_recruitment_01"
-
-  connections:
-    - from: "starting_plains"
-      to: "dark_forest"
-      path: "forest_path"
-    - from: "dark_forest"
-      to: "mountain_peaks"
-      path: "mountain_trail"
-    - from: "mountain_peaks"
-      to: "volcanic_crater"
-      path: "lava_bridge"
-    - from: "starting_plains"
-      to: "ancient_ruins"
-      path: "old_road"
+  # connections:
+  #   - from: "ice_dungeon"
+  #     to: "dark_forest"
+  #     path: "forest_path"
