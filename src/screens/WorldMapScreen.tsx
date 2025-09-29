@@ -7,11 +7,10 @@ import {
   TouchableOpacity,
   Dimensions,
   Alert,
-  ImageBackground,
-  Image,
-} from "react-native";
-import { WorldMap, WorldMapRegion, GameState } from "../types/game";
-import { gameDataService } from "../services/gameDataService";
+} from 'react-native';
+import { WorldMap, WorldMapRegion, GameState } from '../types/game';
+import { GameDataService } from '../services/gameDataService';
+
 
 interface WorldMapScreenProps {
   gameState: GameState;
@@ -27,17 +26,24 @@ export const WorldMapScreen: React.FC<WorldMapScreenProps> = ({
   onBack,
 }) => {
   const [worldMap, setWorldMap] = useState<WorldMap | null>(null);
-  const [selectedRegion, setSelectedRegion] = useState<WorldMapRegion | null>(
-    null
-  );
+  const [selectedRegion, setSelectedRegion] = useState<WorldMapRegion | null>(null);
+  const [gameDataService, setGameDataService] = useState<GameDataService | null>(null);
+
 
   useEffect(() => {
-    loadWorldMap();
+    initializeGameData();
   }, []);
 
-  const loadWorldMap = async () => {
-    const data = await gameDataService.loadWorldMap();
-    setWorldMap(data);
+  const initializeGameData = async () => {
+    try {
+      const service = await GameDataService.createFromYaml();
+      setGameDataService(service);
+      
+      const data = await service.loadWorldMap();
+      setWorldMap(data);
+    } catch (error) {
+      console.error('Error initializing game data:', error);
+    }
   };
 
   const isRegionUnlocked = (region: WorldMapRegion): boolean => {
