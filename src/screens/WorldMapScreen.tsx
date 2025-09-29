@@ -38,7 +38,7 @@ export const WorldMapScreen: React.FC<WorldMapScreenProps> = ({
 
   const initializeGameData = async () => {
     try {
-      const service = await GameDataService.createFromYaml();
+      const service = await GameDataService.createFromData();
       setGameDataService(service);
 
       const data = await service.loadWorldMap();

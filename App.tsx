@@ -25,8 +25,8 @@ export default function App() {
   const initializeGame = async () => {
     setIsLoading(true);
     try {
-      // Initialize game data service from YAML
-      const service = await GameDataService.createFromYaml();
+      // Initialize game data service from data
+      const service = await GameDataService.createFromData();
       await service.initialize();
       setGameDataService(service);
       
