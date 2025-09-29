@@ -6,7 +6,7 @@ import { WorldMapScreen } from './src/screens/WorldMapScreen';
 import { BattleScreen } from './src/screens/BattleScreen';
 import { GameState, GameMap, Monster } from './src/types/game';
 import { storageService } from './src/services/storageService';
-import { gameDataService } from './src/services/gameDataService';
+import { GameDataService } from './src/services/gameDataService';
 
 type GameScreen = 'menu' | 'worldMap' | 'battle' | 'recruitment';
 
@@ -16,6 +16,7 @@ export default function App() {
   const [currentMap, setCurrentMap] = useState<GameMap | null>(null);
   const [battleEnemies, setBattleEnemies] = useState<Monster[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [gameDataService, setGameDataService] = useState<GameDataService | null>(null);
 
   useEffect(() => {
     initializeGame();
@@ -24,8 +25,10 @@ export default function App() {
   const initializeGame = async () => {
     setIsLoading(true);
     try {
-      // Initialize game data service
-      await gameDataService.initialize();
+      // Initialize game data service from YAML
+      const service = await GameDataService.createFromYaml();
+      await service.initialize();
+      setGameDataService(service);
       
       // Try to load existing game state
       const savedState = await storageService.loadGameState();
@@ -64,6 +67,11 @@ export default function App() {
   };
 
   const handleMapSelect = async (mapId: string) => {
+    if (!gameDataService) {
+      Alert.alert('Error', 'Game data not loaded.');
+      return;
+    }
+
     try {
       const maps = await gameDataService.loadMaps();
       const selectedMap = maps.find(map => map.id === mapId);
@@ -88,7 +96,7 @@ export default function App() {
   };
 
   const startBattle = async (map: GameMap) => {
-    if (!map.monsters || !gameState) return;
+    if (!map.monsters || !gameState || !gameDataService) return;
 
     try {
       const monsters = await gameDataService.loadMonsters();
