@@ -1,11 +1,30 @@
+## maps.yaml
+# This file defines individual map scenarios for the game.
+#
+# Structure:
+# - maps: List of map objects, each with:
+#     - id: Unique identifier for the map
+#     - name: Display name
+#     - type: Map type (e.g., monster, recruitment)
+#     - description: Lore or flavor text
+#     - backgroundImage: Associated background image filename
+#     - difficulty: Numeric difficulty rating
+#     - rounds: Number of battle rounds
+#     - monsters: List of monster encounters (id, quantity, round, boss)
+#     - rewards: Rewards for completing the map (gold, experience, items)
+#
+# Usage:
+# This file is loaded by the game to generate map scenarios, battles, and rewards.
+# Modify this file to add new maps, adjust encounters, or change rewards.
+
 maps:
   # Monster Maps
-  - id: "plains_monsters_01"
-    name: "Goblin Outpost"
+  - id: "ice_dungeon"
+    name: "Ice Dungeon"
     type: "monster"
-    description: "A small outpost overrun by goblins"
-    backgroundImage: "plains_bg.png"
-    difficulty: 1
+    description: "A cold and treacherous dungeon filled with ice monsters. Some strange light shines from the inside."
+    backgroundImage: "ice.png"
+    difficulty: 2
     rounds: 3
     monsters:
       - id: "goblin_01"
@@ -24,246 +43,3 @@ maps:
       items:
         - "basic_sword"
         - "leather_vest"
-
-  - id: "forest_monsters_01"
-    name: "Haunted Grove"
-    type: "monster"
-    description: "Undead creatures roam these cursed woods"
-    backgroundImage: "forest_bg.png"
-    difficulty: 2
-    rounds: 4
-    monsters:
-      - id: "skeleton_01"
-        quantity: 2
-        round: 1
-      - id: "skeleton_01"
-        quantity: 1
-        round: 2
-      - id: "goblin_01"
-        quantity: 2
-        round: 2
-      - id: "skeleton_01"
-        quantity: 3
-        round: 3
-      - id: "orc_01"
-        quantity: 1
-        round: 4
-        boss: true
-    rewards:
-      gold: 300
-      experience: 400
-      items:
-        - "silver_sword"
-        - "chain_mail"
-
-  - id: "forest_monsters_02"
-    name: "Orc Stronghold"
-    type: "monster"
-    description: "A fortified position held by orc warriors"
-    backgroundImage: "stronghold_bg.png"
-    difficulty: 3
-    rounds: 5
-    monsters:
-      - id: "orc_01"
-        quantity: 2
-        round: 1
-      - id: "orc_01"
-        quantity: 3
-        round: 2
-      - id: "orc_01"
-        quantity: 2
-        round: 3
-      - id: "goblin_01"
-        quantity: 4
-        round: 3
-      - id: "orc_01"
-        quantity: 1
-        round: 4
-      - id: "orc_01"
-        quantity: 2
-        round: 5
-        boss: true
-    rewards:
-      gold: 500
-      experience: 650
-      items:
-        - "orc_axe"
-        - "steel_armor"
-
-  - id: "mountain_monsters_01"
-    name: "Dragon's Lair"
-    type: "monster"
-    description: "The lair of a fearsome dragon"
-    backgroundImage: "mountain_bg.png"
-    difficulty: 5
-    rounds: 6
-    monsters:
-      - id: "fire_elemental_01"
-        quantity: 2
-        round: 1
-      - id: "fire_elemental_01"
-        quantity: 3
-        round: 2
-      - id: "orc_01"
-        quantity: 4
-        round: 3
-      - id: "fire_elemental_01"
-        quantity: 2
-        round: 4
-      - id: "skeleton_01"
-        quantity: 5
-        round: 4
-      - id: "fire_elemental_01"
-        quantity: 4
-        round: 5
-      - id: "dragon_01"
-        quantity: 1
-        round: 6
-        boss: true
-    rewards:
-      gold: 1000
-      experience: 1200
-      items:
-        - "dragon_blade"
-        - "dragon_armor"
-        - "fire_resistance_ring"
-
-  # Recruitment Maps
-  - id: "village_recruitment_01"
-    name: "Peaceful Village"
-    type: "recruitment"
-    description: "A small village where heroes can be recruited"
-    backgroundImage: "village_bg.png"
-    recruitmentCost: 100
-    availableCharacters:
-      - class: "warrior"
-        level: 1
-        cost: 150
-        stats:
-          hp: 80
-          attack: 15
-          defense: 12
-          speed: 8
-          magic: 2
-      - class: "archer"
-        level: 1
-        cost: 120
-        stats:
-          hp: 60
-          attack: 12
-          defense: 8
-          speed: 15
-          magic: 5
-      - class: "mage"
-        level: 1
-        cost: 180
-        stats:
-          hp: 45
-          attack: 8
-          defense: 6
-          speed: 10
-          magic: 20
-
-  - id: "druid_recruitment_01"
-    name: "Druid Circle"
-    type: "recruitment"
-    description: "Ancient druids offer their services to worthy heroes"
-    backgroundImage: "druid_circle_bg.png"
-    recruitmentCost: 200
-    availableCharacters:
-      - class: "druid"
-        level: 3
-        cost: 300
-        stats:
-          hp: 70
-          attack: 12
-          defense: 10
-          speed: 12
-          magic: 18
-      - class: "ranger"
-        level: 2
-        cost: 250
-        stats:
-          hp: 65
-          attack: 16
-          defense: 9
-          speed: 18
-          magic: 8
-
-  - id: "dwarven_recruitment_01"
-    name: "Dwarven Outpost"
-    type: "recruitment"
-    description: "Skilled dwarven warriors and craftsmen"
-    backgroundImage: "dwarven_bg.png"
-    recruitmentCost: 300
-    availableCharacters:
-      - class: "dwarven_warrior"
-        level: 4
-        cost: 400
-        stats:
-          hp: 100
-          attack: 20
-          defense: 18
-          speed: 6
-          magic: 0
-      - class: "dwarven_cleric"
-        level: 4
-        cost: 450
-        stats:
-          hp: 85
-          attack: 10
-          defense: 15
-          speed: 8
-          magic: 22
-
-  - id: "fire_temple_recruitment_01"
-    name: "Fire Temple"
-    type: "recruitment"
-    description: "Temple of fire where elemental masters dwell"
-    backgroundImage: "fire_temple_bg.png"
-    recruitmentCost: 500
-    availableCharacters:
-      - class: "fire_mage"
-        level: 6
-        cost: 600
-        stats:
-          hp: 65
-          attack: 12
-          defense: 8
-          speed: 12
-          magic: 35
-      - class: "fire_knight"
-        level: 6
-        cost: 700
-        stats:
-          hp: 120
-          attack: 28
-          defense: 22
-          speed: 10
-          magic: 15
-
-  - id: "ancient_recruitment_01"
-    name: "Ancient Sanctuary"
-    type: "recruitment"
-    description: "Legendary heroes from ages past"
-    backgroundImage: "ancient_bg.png"
-    recruitmentCost: 800
-    availableCharacters:
-      - class: "ancient_guardian"
-        level: 8
-        cost: 1000
-        stats:
-          hp: 150
-          attack: 35
-          defense: 30
-          speed: 15
-          magic: 25
-      - class: "void_mage"
-        level: 8
-        cost: 1200
-        stats:
-          hp: 80
-          attack: 15
-          defense: 12
-          speed: 18
-          magic: 45
