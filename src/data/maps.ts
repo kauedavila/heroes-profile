@@ -10,7 +10,6 @@
  * - type: Tipo do mapa ("monster" para combate, "recruitment" para recrutamento)
  * - description: Descrição/lore do mapa
  * - backgroundImage: Nome do arquivo de imagem de fundo
- * - difficulty: Dificuldade (apenas mapas de combate)
  * - rounds: Número de rodadas (apenas mapas de combate)
  * - monsters: Lista de inimigos por rodada (apenas mapas de combate)
  * - rewards: Recompensas ao completar o mapa (ouro, experiência, itens)
@@ -26,17 +25,12 @@ export const MAPS: GameMap[] = [
   // Plains area maps
   {
     id: "ice_dungeon_01",
-    name: "Goblin Outpost",
+    name: "Ice Dungeon Entrance",
     type: "monster",
-    description: "A small outpost overrun by goblins",
-    backgroundImage: "plains_bg.png",
-    difficulty: 1,
-    rounds: 3,
-    monsters: [
-      { id: "goblin_01", quantity: 2, round: 1 },
-      { id: "goblin_01", quantity: 3, round: 2 },
-      { id: "goblin_01", quantity: 1, round: 3, boss: true },
-    ],
+    description: "An entrance to a cold dungeon filled with ice monsters",
+    backgroundImage: "ice_1.png",
+    rounds: 1,
+    monsters: [{ id: "slime_icei", quantity: 2, round: 1 }],
   },
   {
     id: "village_recruitment_01",

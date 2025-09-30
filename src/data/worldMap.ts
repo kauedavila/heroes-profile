@@ -32,7 +32,7 @@ export const WORLD_MAP: WorldMap = {
       description: "A cold and treacherous dungeon filled with ice monsters",
       position: { x: 900, y: 500 },
       unlocked: true,
-      maps: ["ice_dungeon_01", "ice_dungeon_02", "ice_dungeon_03"],
+      maps: ["ice_dungeon_01"],
     },
     {
       id: "dark_forest",

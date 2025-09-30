@@ -72,7 +72,6 @@ export interface GameMap {
   type: "monster" | "recruitment";
   description: string;
   backgroundImage: string;
-  difficulty?: number;
   rounds?: number;
   monsters?: MapMonster[];
   rewards?: MapReward;
