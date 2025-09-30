@@ -84,7 +84,7 @@ export class BattleSystem {
       if (character.currentHp > 0) {
         // Action meter fills based on character's speed
         // Higher speed = faster meter fill
-        const speedMultiplier = character.stats.speed / 2;
+        const speedMultiplier = character.stats.speed;
         character.actionMeter += speedMultiplier;
 
         if (character.actionMeter >= 100) {
