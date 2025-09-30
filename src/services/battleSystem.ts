@@ -1,4 +1,10 @@
-import { BattleCharacter, BattleAction, BattleState, Character, Monster } from '../types/game';
+import {
+  BattleCharacter,
+  BattleAction,
+  BattleState,
+  Character,
+  Monster,
+} from "../types/game";
 
 export class BattleSystem {
   private battleState: BattleState;
@@ -14,7 +20,10 @@ export class BattleSystem {
     this.battleState = this.initializeBattle(playerParty, enemies);
   }
 
-  private initializeBattle(playerParty: Character[], enemies: Monster[]): BattleState {
+  private initializeBattle(
+    playerParty: Character[],
+    enemies: Monster[]
+  ): BattleState {
     const characters: BattleCharacter[] = [];
 
     // Add player characters
@@ -24,7 +33,7 @@ export class BattleSystem {
         id: `player_${index}`,
         currentHp: char.stats.hp,
         actionMeter: 0,
-        isPlayerControlled: true
+        isPlayerControlled: true,
       });
     });
 
@@ -33,7 +42,7 @@ export class BattleSystem {
       characters.push({
         id: `enemy_${index}`,
         name: enemy.name,
-        class: 'monster',
+        class: "monster",
         level: enemy.level,
         stats: { ...enemy.stats },
         experience: 0,
@@ -41,7 +50,7 @@ export class BattleSystem {
         equipment: {},
         currentHp: enemy.stats.hp,
         actionMeter: 0,
-        isPlayerControlled: false
+        isPlayerControlled: false,
       });
     });
 
@@ -51,7 +60,7 @@ export class BattleSystem {
       totalRounds: 1,
       isPlayerTurn: false,
       actionQueue: [],
-      battleLog: ['Battle begins!']
+      battleLog: ["Battle begins!"],
     };
   }
 
@@ -71,11 +80,11 @@ export class BattleSystem {
   private updateActionMeters(): void {
     let shouldUpdate = false;
 
-    this.battleState.characters.forEach(character => {
+    this.battleState.characters.forEach((character) => {
       if (character.currentHp > 0) {
         // Action meter fills based on character's speed
         // Higher speed = faster meter fill
-        const speedMultiplier = character.stats.speed / 10;
+        const speedMultiplier = character.stats.speed / 2;
         character.actionMeter += speedMultiplier;
 
         if (character.actionMeter >= 100) {
@@ -94,12 +103,12 @@ export class BattleSystem {
 
   private checkForReadyCharacters(): void {
     const readyCharacters = this.battleState.characters.filter(
-      char => char.currentHp > 0 && char.actionMeter >= 100
+      (char) => char.currentHp > 0 && char.actionMeter >= 100
     );
 
     if (readyCharacters.length > 0) {
       const nextCharacter = readyCharacters[0];
-      
+
       if (nextCharacter.isPlayerControlled) {
         this.battleState.isPlayerTurn = true;
         // Pause the battle timer to wait for player input
@@ -113,7 +122,7 @@ export class BattleSystem {
 
   private performAIAction(character: BattleCharacter): void {
     const playerCharacters = this.battleState.characters.filter(
-      char => char.isPlayerControlled && char.currentHp > 0
+      (char) => char.isPlayerControlled && char.currentHp > 0
     );
 
     if (playerCharacters.length === 0) {
@@ -123,11 +132,12 @@ export class BattleSystem {
     }
 
     // Simple AI: attack random player character
-    const target = playerCharacters[Math.floor(Math.random() * playerCharacters.length)];
+    const target =
+      playerCharacters[Math.floor(Math.random() * playerCharacters.length)];
     const action: BattleAction = {
-      type: 'attack',
+      type: "attack",
       source: character,
-      target
+      target,
     };
 
     this.executeAction(action);
@@ -140,7 +150,7 @@ export class BattleSystem {
 
     this.executeAction(action);
     this.battleState.isPlayerTurn = false;
-    
+
     // Resume battle timer
     this.startBattle();
   }
@@ -149,16 +159,16 @@ export class BattleSystem {
     const { source, target, type } = action;
 
     switch (type) {
-      case 'attack':
+      case "attack":
         this.performAttack(source, target!);
         break;
-      case 'ability':
+      case "ability":
         this.performAbility(source, target, action.abilityId!);
         break;
-      case 'guard':
+      case "guard":
         this.performGuard(source);
         break;
-      case 'item':
+      case "item":
         this.performItemUse(source, target, action.itemId!);
         break;
     }
@@ -172,14 +182,18 @@ export class BattleSystem {
     this.onStateChange({ ...this.battleState });
   }
 
-  private performAttack(attacker: BattleCharacter, target: BattleCharacter): void {
+  private performAttack(
+    attacker: BattleCharacter,
+    target: BattleCharacter
+  ): void {
     const baseDamage = attacker.stats.attack;
     const defense = target.stats.defense;
-    
+
     // Calculate damage with some randomness
-    const damage = Math.max(1, Math.floor(
-      (baseDamage - defense / 2) * (0.8 + Math.random() * 0.4)
-    ));
+    const damage = Math.max(
+      1,
+      Math.floor((baseDamage - defense / 2) * (0.8 + Math.random() * 0.4))
+    );
 
     target.currentHp = Math.max(0, target.currentHp - damage);
 
@@ -192,25 +206,25 @@ export class BattleSystem {
   }
 
   private performAbility(
-    caster: BattleCharacter, 
-    target: BattleCharacter | undefined, 
+    caster: BattleCharacter,
+    target: BattleCharacter | undefined,
     abilityId: string
   ): void {
     // Simple ability system - could be expanded
-    const ability = caster.abilities.find(ab => ab === abilityId);
+    const ability = caster.abilities.find((ab) => ab === abilityId);
     if (!ability) return;
 
     let damage = 0;
     let healing = 0;
 
     switch (abilityId) {
-      case 'Fireball':
+      case "Fireball":
         damage = Math.floor(caster.stats.magic * 1.5);
         break;
-      case 'Heal':
+      case "Heal":
         healing = Math.floor(caster.stats.magic * 1.2);
         break;
-      case 'Power Strike':
+      case "Power Strike":
         damage = Math.floor(caster.stats.attack * 1.3);
         break;
       default:
@@ -226,7 +240,10 @@ export class BattleSystem {
     }
 
     if (target && healing > 0) {
-      const actualHealing = Math.min(healing, target.stats.hp - target.currentHp);
+      const actualHealing = Math.min(
+        healing,
+        target.stats.hp - target.currentHp
+      );
       target.currentHp += actualHealing;
       this.battleState.battleLog.push(
         `${caster.name} heals ${target.name} for ${actualHealing} HP!`
@@ -236,20 +253,25 @@ export class BattleSystem {
 
   private performGuard(character: BattleCharacter): void {
     // Guarding reduces incoming damage for the next turn
-    this.battleState.battleLog.push(`${character.name} takes a defensive stance!`);
+    this.battleState.battleLog.push(
+      `${character.name} takes a defensive stance!`
+    );
   }
 
   private performItemUse(
-    user: BattleCharacter, 
-    target: BattleCharacter | undefined, 
+    user: BattleCharacter,
+    target: BattleCharacter | undefined,
     itemId: string
   ): void {
     // Simple item system
     switch (itemId) {
-      case 'healing_potion':
+      case "healing_potion":
         if (target) {
           const healing = 50;
-          const actualHealing = Math.min(healing, target.stats.hp - target.currentHp);
+          const actualHealing = Math.min(
+            healing,
+            target.stats.hp - target.currentHp
+          );
           target.currentHp += actualHealing;
           this.battleState.battleLog.push(
             `${user.name} uses Healing Potion on ${target.name} for ${actualHealing} HP!`
@@ -261,11 +283,11 @@ export class BattleSystem {
 
   private checkBattleEnd(): void {
     const alivePlayerCharacters = this.battleState.characters.filter(
-      char => char.isPlayerControlled && char.currentHp > 0
+      (char) => char.isPlayerControlled && char.currentHp > 0
     );
 
     const aliveEnemyCharacters = this.battleState.characters.filter(
-      char => !char.isPlayerControlled && char.currentHp > 0
+      (char) => !char.isPlayerControlled && char.currentHp > 0
     );
 
     if (alivePlayerCharacters.length === 0) {
@@ -277,11 +299,15 @@ export class BattleSystem {
 
   private endBattle(playerWon: boolean): void {
     this.stopBattle();
-    
+
     if (playerWon) {
-      this.battleState.battleLog.push('Victory! The enemies have been defeated!');
+      this.battleState.battleLog.push(
+        "Victory! The enemies have been defeated!"
+      );
     } else {
-      this.battleState.battleLog.push('Defeat! Your party has been defeated...');
+      this.battleState.battleLog.push(
+        "Defeat! Your party has been defeated..."
+      );
     }
 
     this.onStateChange({ ...this.battleState });
@@ -295,12 +321,12 @@ export class BattleSystem {
     if (isPlayerAction) {
       // Player can target enemies
       return this.battleState.characters.filter(
-        char => !char.isPlayerControlled && char.currentHp > 0
+        (char) => !char.isPlayerControlled && char.currentHp > 0
       );
     } else {
       // Enemies can target players
       return this.battleState.characters.filter(
-        char => char.isPlayerControlled && char.currentHp > 0
+        (char) => char.isPlayerControlled && char.currentHp > 0
       );
     }
   }
@@ -309,12 +335,12 @@ export class BattleSystem {
     if (isPlayerAction) {
       // Player can target allies
       return this.battleState.characters.filter(
-        char => char.isPlayerControlled && char.currentHp > 0
+        (char) => char.isPlayerControlled && char.currentHp > 0
       );
     } else {
       // Enemies can target other enemies
       return this.battleState.characters.filter(
-        char => !char.isPlayerControlled && char.currentHp > 0
+        (char) => !char.isPlayerControlled && char.currentHp > 0
       );
     }
   }
