@@ -311,9 +311,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           {/* Action Meter */}
           {renderActionMeter(character)}
 
-          {/* Cooldowns */}
-          {renderMoveCooldowns(character)}
-
           {/* Potential Display */}
           {character.potential !== undefined && character.potential > 0 && (
             <Text style={styles.potentialText}>⚡ {character.potential}</Text>
