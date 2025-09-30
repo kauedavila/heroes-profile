@@ -112,7 +112,7 @@ class StorageService {
         magic: 2
       },
       experience: 0,
-      abilities: ['Slash', 'Guard'],
+      moves: ['slash', 'guard'],
       equipment: {}
     };
 

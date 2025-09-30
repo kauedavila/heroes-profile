@@ -1,20 +1,23 @@
-import { Monster, GameMap, WorldMap } from '../types/game';
+import { Monster, GameMap, WorldMap, Move } from '../types/game';
 import { DataLoader } from './dataLoader';
 
 export class GameDataService {
   private monstersData: Monster[] | null = null;
   private mapsData: GameMap[] | null = null;
   private worldMapData: WorldMap | null = null;
+  private movesData: Move[] | null = null;
 
   constructor(initialData?: {
     monsters?: Monster[];
     maps?: GameMap[];
     worldMap?: WorldMap | null;
+    moves?: Move[];
   }) {
     if (initialData) {
       this.monstersData = initialData.monsters || null;
       this.mapsData = initialData.maps || null;
       this.worldMapData = initialData.worldMap || null;
+      this.movesData = initialData.moves || null;
     }
   }
 
@@ -42,6 +45,20 @@ export class GameDataService {
       return this.mapsData;
     } catch (error) {
       console.error('Error loading maps:', error);
+      return [];
+    }
+  }
+
+  async loadMoves(): Promise<Move[]> {
+    if (this.movesData) {
+      return this.movesData;
+    }
+
+    try {
+      this.movesData = await DataLoader.loadMoves();
+      return this.movesData;
+    } catch (error) {
+      console.error('Error loading moves:', error);
       return [];
     }
   }
@@ -74,12 +91,20 @@ export class GameDataService {
     return this.mapsData.find(map => map.id === id) || null;
   }
 
+  getMoveById(id: string): Move | null {
+    if (!this.movesData) {
+      return null;
+    }
+    return this.movesData.find(move => move.id === id) || null;
+  }
+
   // Initialize all data
   async initialize(): Promise<void> {
     await Promise.all([
       this.loadMonsters(),
       this.loadMaps(),
-      this.loadWorldMap()
+      this.loadWorldMap(),
+      this.loadMoves()
     ]);
   }
 

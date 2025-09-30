@@ -33,7 +33,7 @@ export const MONSTERS: Monster[] = [
       speed: 10,
       magic: 5,
     },
-    abilities: ["Freeze", "Bounce"],
+    moves: ["freeze", "bounce"],
     rewards: {
       gold: 15,
       experience: 20,

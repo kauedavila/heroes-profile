@@ -11,10 +11,12 @@ import {
 } from 'react-native';
 import { BattleSystem } from '../services/battleSystem';
 import { BattleState, BattleCharacter, BattleAction, Character, Monster } from '../types/game';
+import { GameDataService } from '../services/gameDataService';
 
 interface BattleScreenProps {
   playerParty: Character[];
   enemies: Monster[];
+  gameDataService: GameDataService;
   onBattleEnd: (victory: boolean, rewards?: any) => void;
 }
 
@@ -23,6 +25,7 @@ const { width, height } = Dimensions.get('window');
 export const BattleScreen: React.FC<BattleScreenProps> = ({
   playerParty,
   enemies,
+  gameDataService,
   onBattleEnd
 }) => {
   const [battleState, setBattleState] = useState<BattleState | null>(null);
@@ -54,7 +57,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     battleSystemRef.current = new BattleSystem(
       playerParty,
       enemies,
-      handleBattleStateChange
+      handleBattleStateChange,
+      gameDataService
     );
     
     const initialState = battleSystemRef.current.getBattleState();
@@ -121,7 +125,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
       // Show target selection for other actions
       let targets: BattleCharacter[] = [];
       
-      if (actionType === 'attack' || actionType === 'ability') {
+      if (actionType === 'attack' || actionType === 'move') {
         targets = battleSystemRef.current.getAvailableTargets(true);
       } else if (actionType === 'heal') {
         targets = battleSystemRef.current.getAvailableAllies(true);
@@ -145,14 +149,16 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           target
         };
         break;
-      case 'ability':
-        // For simplicity, use the first ability
-        const abilityId = selectedCharacter.abilities[0] || 'Basic Attack';
+      case 'move':
+        // For simplicity, use the first available move that's not on cooldown
+        const availableMove = selectedCharacter.moves.find(moveId => 
+          (selectedCharacter.moveCooldowns[moveId] || 0) <= 0
+        ) || selectedCharacter.moves[0] || 'basic_attack';
         action = {
-          type: 'ability',
+          type: 'move',
           source: selectedCharacter,
           target,
-          abilityId
+          moveId: availableMove
         };
         break;
       case 'item':
@@ -284,9 +290,9 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           
           <TouchableOpacity 
             style={styles.actionButton}
-            onPress={() => handleActionSelect('ability')}
+            onPress={() => handleActionSelect('move')}
           >
-            <Text style={styles.actionButtonText}>✨ Ability</Text>
+            <Text style={styles.actionButtonText}>✨ Move</Text>
           </TouchableOpacity>
           
           <TouchableOpacity 
