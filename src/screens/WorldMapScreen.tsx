@@ -163,12 +163,7 @@ export const WorldMapScreen: React.FC<WorldMapScreenProps> = ({
 
   if (selectedRegion) {
     return (
-      <ImageBackground
-        source={{
-          uri: "https://via.placeholder.com/800x600/2c2c54/ffffff?text=Region+View",
-        }}
-        style={styles.container}
-      >
+      <ImageBackground style={styles.container}>
         <View style={styles.overlay}>{renderRegionMaps()}</View>
       </ImageBackground>
     );

@@ -28,7 +28,7 @@ export const MAPS: GameMap[] = [
     name: "Ice Dungeon Entrance",
     type: "monster",
     description: "An entrance to a cold dungeon filled with ice monsters",
-    backgroundImage: "ice_1.png",
+    backgroundImage: "ice_dungeon_01.png",
     rounds: 1,
     monsters: [{ id: "slime_icei", quantity: 2, round: 1 }],
   },
