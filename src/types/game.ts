@@ -65,6 +65,7 @@ export interface BattleCharacter extends Character {
   actionMeter: number;
   isPlayerControlled: boolean;
   moveCooldowns: { [moveId: string]: number }; // Remaining cooldown turns for each move
+  image?: string | string[];
 }
 
 export interface MapMonster {

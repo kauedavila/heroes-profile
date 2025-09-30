@@ -40,6 +40,7 @@ export class BattleSystem {
         actionMeter: 0,
         isPlayerControlled: true,
         moveCooldowns: {},
+        // image: char.image || null, // Uncomment if you add images for player characters
       });
     });
 
@@ -58,6 +59,7 @@ export class BattleSystem {
         actionMeter: 0,
         isPlayerControlled: false,
         moveCooldowns: {},
+        image: enemy.image,
       });
     });
 
@@ -141,14 +143,17 @@ export class BattleSystem {
 
     // Simple AI: choose random available move or basic attack
     let action: BattleAction;
-    const availableMoves = character.moves.filter(moveId => 
-      this.getMoveById(moveId) && (character.moveCooldowns[moveId] || 0) <= 0
+    const availableMoves = character.moves.filter(
+      (moveId) =>
+        this.getMoveById(moveId) && (character.moveCooldowns[moveId] || 0) <= 0
     );
 
     if (availableMoves.length > 0 && Math.random() > 0.3) {
       // 70% chance to use a move instead of basic attack
-      const moveId = availableMoves[Math.floor(Math.random() * availableMoves.length)];
-      const target = playerCharacters[Math.floor(Math.random() * playerCharacters.length)];
+      const moveId =
+        availableMoves[Math.floor(Math.random() * availableMoves.length)];
+      const target =
+        playerCharacters[Math.floor(Math.random() * playerCharacters.length)];
       action = {
         type: "move",
         source: character,
@@ -157,7 +162,8 @@ export class BattleSystem {
       };
     } else {
       // Basic attack
-      const target = playerCharacters[Math.floor(Math.random() * playerCharacters.length)];
+      const target =
+        playerCharacters[Math.floor(Math.random() * playerCharacters.length)];
       action = {
         type: "attack",
         source: character,
@@ -216,15 +222,16 @@ export class BattleSystem {
   }
 
   private updateCooldowns(): void {
-    this.battleState.characters.forEach(character => {
+    this.battleState.characters.forEach((character) => {
       if (character.currentHp > 0) {
         // Reduce cooldowns based on agility (speed)
         // Higher agility reduces cooldowns faster
         const agilityBonus = Math.max(0.1, character.stats.speed / 100);
-        
+
         for (const moveId in character.moveCooldowns) {
           if (character.moveCooldowns[moveId] > 0) {
-            character.moveCooldowns[moveId] = Math.max(0, 
+            character.moveCooldowns[moveId] = Math.max(
+              0,
               character.moveCooldowns[moveId] - (1 + agilityBonus)
             );
           }
@@ -240,7 +247,9 @@ export class BattleSystem {
   ): void {
     const move = this.getMoveById(moveId);
     if (!move || !caster.moves.includes(moveId)) {
-      this.battleState.battleLog.push(`${caster.name} tried to use an unknown move!`);
+      this.battleState.battleLog.push(
+        `${caster.name} tried to use an unknown move!`
+      );
       return;
     }
 
@@ -252,9 +261,9 @@ export class BattleSystem {
 
     // Calculate damage/healing based on move formula
     const damageAmount = Math.floor(
-      (move.damageRatio.attack * caster.stats.attack) +
-      (move.damageRatio.magic * caster.stats.magic) +
-      (move.damageRatio.level * caster.level)
+      move.damageRatio.attack * caster.stats.attack +
+        move.damageRatio.magic * caster.stats.magic +
+        move.damageRatio.level * caster.level
     );
 
     // Apply cooldown (modified by agility for realism)
@@ -269,7 +278,10 @@ export class BattleSystem {
       case "physical":
       case "magical":
         if (target && damageAmount > 0) {
-          const actualDamage = Math.max(1, damageAmount - target.stats.defense / 2);
+          const actualDamage = Math.max(
+            1,
+            damageAmount - target.stats.defense / 2
+          );
           target.currentHp = Math.max(0, target.currentHp - actualDamage);
           this.battleState.battleLog.push(
             `${caster.name} uses ${move.name} on ${target.name} for ${actualDamage} damage!`
@@ -284,7 +296,10 @@ export class BattleSystem {
       case "healing":
         if (target && move.effects?.heal) {
           const healAmount = Math.floor(damageAmount * move.effects.heal);
-          const actualHealing = Math.min(healAmount, target.stats.hp - target.currentHp);
+          const actualHealing = Math.min(
+            healAmount,
+            target.stats.hp - target.currentHp
+          );
           target.currentHp += actualHealing;
           this.battleState.battleLog.push(
             `${caster.name} uses ${move.name} on ${target.name} and heals ${actualHealing} HP!`

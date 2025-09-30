@@ -20,6 +20,8 @@ import {
 import { GameDataService } from "../services/gameDataService";
 import { GameMap } from "../types/game";
 import { mapImages } from "../data/maps";
+import { monsterImages } from "../data/monsters";
+import { Image } from "react-native";
 
 interface BattleScreenProps {
   playerParty: Character[];
@@ -247,6 +249,26 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     const isAlive = character.currentHp > 0;
     const hpPercentage = (character.currentHp / character.stats.hp) * 100;
 
+    // Monster image logic
+    let imageSource = null;
+    if (!isPlayer) {
+      // Enemy: get monster image
+      let monsterImageKey = null;
+      if (Array.isArray(character.image)) {
+        // Pick random image from array
+        const arr = character.image;
+        monsterImageKey = arr[Math.floor(Math.random() * arr.length)];
+      } else {
+        monsterImageKey = character.image;
+      }
+      imageSource =
+        typeof monsterImageKey === "string"
+          ? monsterImages[monsterImageKey] || null
+          : null;
+    } else {
+      imageSource = require("../../assets/monsters/Boss Mythical Knight Goldnharl.png");
+    }
+
     return (
       <View
         key={`${character.id}-${index}`}
@@ -256,6 +278,13 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
         ]}
       >
         <View style={styles.characterInfo}>
+          {imageSource && (
+            <Image
+              source={imageSource}
+              style={styles.characterImage}
+              resizeMode="contain"
+            />
+          )}
           <Text style={[styles.characterName, isPlayer && styles.playerName]}>
             {character.name}
           </Text>
@@ -430,6 +459,12 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
 };
 
 const styles = StyleSheet.create({
+  characterImage: {
+    width: 64,
+    height: 64,
+    marginBottom: 6,
+    alignSelf: "center",
+  },
   container: {
     flex: 1,
     width: width,

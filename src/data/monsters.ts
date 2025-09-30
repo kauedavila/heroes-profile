@@ -24,7 +24,7 @@ export const MONSTERS: Monster[] = [
   {
     id: "slime_icei",
     name: "Ice Slime",
-    image: ["slime_icei.png", "slime_iceii.png", "slime_iceiii.png"],
+    image: ["Slime Icei.png", "Slime Iceii.png", "Slime Iceiii.png"],
     level: 2,
     stats: {
       hp: 30,
@@ -44,3 +44,9 @@ export const MONSTERS: Monster[] = [
     ],
   },
 ];
+
+export const monsterImages: { [key: string]: any } = {
+  "Slime Icei.png": require("../../assets/monsters/Slime Icei.png"),
+  "Slime Iceii.png": require("../../assets/monsters/Slime Iceii.png"),
+  "Slime Iceiii.png": require("../../assets/monsters/Slime Iceiii.png"),
+};
