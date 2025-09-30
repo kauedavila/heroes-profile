@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -7,33 +7,46 @@ import {
   ScrollView,
   Dimensions,
   ImageBackground,
-  Alert
-} from 'react-native';
-import { BattleSystem } from '../services/battleSystem';
-import { BattleState, BattleCharacter, BattleAction, Character, Monster } from '../types/game';
-import { GameDataService } from '../services/gameDataService';
+  Alert,
+} from "react-native";
+import { BattleSystem } from "../services/battleSystem";
+import {
+  BattleState,
+  BattleCharacter,
+  BattleAction,
+  Character,
+  Monster,
+} from "../types/game";
+import { GameDataService } from "../services/gameDataService";
+import { GameMap } from "../types/game";
+import { mapImages } from "../data/maps";
 
 interface BattleScreenProps {
   playerParty: Character[];
   enemies: Monster[];
   gameDataService: GameDataService;
   onBattleEnd: (victory: boolean, rewards?: any) => void;
+  currentMap: GameMap | null;
 }
 
-const { width, height } = Dimensions.get('window');
+const { width, height } = Dimensions.get("window");
 
 export const BattleScreen: React.FC<BattleScreenProps> = ({
   playerParty,
   enemies,
   gameDataService,
-  onBattleEnd
+  onBattleEnd,
+  currentMap,
 }) => {
   const [battleState, setBattleState] = useState<BattleState | null>(null);
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
-  const [selectedCharacter, setSelectedCharacter] = useState<BattleCharacter | null>(null);
+  const [selectedCharacter, setSelectedCharacter] =
+    useState<BattleCharacter | null>(null);
   const [showTargetSelection, setShowTargetSelection] = useState(false);
-  const [availableTargets, setAvailableTargets] = useState<BattleCharacter[]>([]);
-  
+  const [availableTargets, setAvailableTargets] = useState<BattleCharacter[]>(
+    []
+  );
+
   const battleSystemRef = useRef<BattleSystem | null>(null);
   const battleLogRef = useRef<ScrollView>(null);
 
@@ -60,22 +73,22 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
       handleBattleStateChange,
       gameDataService
     );
-    
+
     const initialState = battleSystemRef.current.getBattleState();
     setBattleState(initialState);
-    
+
     battleSystemRef.current.startBattle();
   };
 
   const handleBattleStateChange = (newState: BattleState) => {
     setBattleState({ ...newState });
-    
+
     // Check if battle is over
     const alivePlayerCharacters = newState.characters.filter(
-      char => char.isPlayerControlled && char.currentHp > 0
+      (char) => char.isPlayerControlled && char.currentHp > 0
     );
     const aliveEnemyCharacters = newState.characters.filter(
-      char => !char.isPlayerControlled && char.currentHp > 0
+      (char) => !char.isPlayerControlled && char.currentHp > 0
     );
 
     if (alivePlayerCharacters.length === 0) {
@@ -87,17 +100,23 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   };
 
   const calculateRewards = () => {
-    const totalGold = enemies.reduce((sum, enemy) => sum + enemy.rewards.gold, 0);
-    const totalExp = enemies.reduce((sum, enemy) => sum + enemy.rewards.experience, 0);
-    
+    const totalGold = enemies.reduce(
+      (sum, enemy) => sum + enemy.rewards.gold,
+      0
+    );
+    const totalExp = enemies.reduce(
+      (sum, enemy) => sum + enemy.rewards.experience,
+      0
+    );
+
     return {
       gold: totalGold,
       experience: totalExp,
-      items: enemies.flatMap(enemy => 
+      items: enemies.flatMap((enemy) =>
         enemy.dropItems
-          .filter(drop => Math.random() < drop.chance)
-          .map(drop => drop.item)
-      )
+          .filter((drop) => Math.random() < drop.chance)
+          .map((drop) => drop.item)
+      ),
     };
   };
 
@@ -105,68 +124,63 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     if (!battleState?.isPlayerTurn || !battleSystemRef.current) return;
 
     const activeCharacter = battleState.characters.find(
-      char => char.isPlayerControlled && char.actionMeter >= 100
+      (char) => char.isPlayerControlled && char.actionMeter >= 100
     );
 
     if (!activeCharacter) return;
 
     setSelectedCharacter(activeCharacter);
     setSelectedAction(actionType);
-
-    if (actionType === 'guard') {
-      // Guard doesn't need target selection
-      const action: BattleAction = {
-        type: 'guard',
-        source: activeCharacter
-      };
-      battleSystemRef.current.performPlayerAction(action);
-      resetSelection();
-    } else {
-      // Show target selection for other actions
+    {
+      // Show target selection
       let targets: BattleCharacter[] = [];
-      
-      if (actionType === 'attack' || actionType === 'move') {
+
+      if (actionType === "attack") {
         targets = battleSystemRef.current.getAvailableTargets(true);
-      } else if (actionType === 'heal') {
+      } else if (actionType === "heal") {
         targets = battleSystemRef.current.getAvailableAllies(true);
       }
-      
+
       setAvailableTargets(targets);
       setShowTargetSelection(true);
     }
   };
 
   const handleTargetSelect = (target: BattleCharacter) => {
-    if (!selectedCharacter || !selectedAction || !battleSystemRef.current) return;
+    if (!selectedCharacter || !selectedAction || !battleSystemRef.current)
+      return;
 
     let action: BattleAction;
 
     switch (selectedAction) {
-      case 'attack':
+      case "attack":
         action = {
-          type: 'attack',
+          type: "attack",
           source: selectedCharacter,
-          target
+          target,
         };
         break;
-      case 'move':
+      case "move":
         // For simplicity, use the first available move that's not on cooldown
-        const availableMove = selectedCharacter.moves.find(moveId => 
-          (selectedCharacter.moveCooldowns[moveId] || 0) <= 0
-        ) || selectedCharacter.moves[0] || 'basic_attack';
+        const availableMove =
+          selectedCharacter.moves.find(
+            (moveId) => (selectedCharacter.moveCooldowns[moveId] || 0) <= 0
+          ) ||
+          selectedCharacter.moves[0] ||
+          "basic_attack";
         action = {
-          type: 'move',
+          type: "move",
           source: selectedCharacter,
           target,
-          moveId: availableMove
+          moveId: availableMove,
         };
         break;
-      case 'item':
+      case "item":
         action = {
-          type: 'item',
+          type: "item",
           source: selectedCharacter,
           target,
-          itemId: 'healing_potion'
+          itemId: "healing_potion",
         };
         break;
       default:
@@ -187,22 +201,22 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   const renderActionMeter = (character: BattleCharacter) => {
     const percentage = Math.min(100, character.actionMeter);
     const isReady = percentage >= 100;
-    
+
     return (
       <View style={styles.actionMeterContainer}>
         <View style={styles.actionMeterBg}>
-          <View 
+          <View
             style={[
               styles.actionMeterFill,
-              { 
+              {
                 width: `${percentage}%`,
-                backgroundColor: isReady ? '#32CD32' : '#FFD700'
-              }
-            ]} 
+                backgroundColor: isReady ? "#32CD32" : "#FFD700",
+              },
+            ]}
           />
         </View>
         <Text style={styles.actionMeterText}>
-          {isReady ? 'READY!' : `${Math.floor(percentage)}%`}
+          {isReady ? "READY!" : `${Math.floor(percentage)}%`}
         </Text>
       </View>
     );
@@ -232,13 +246,13 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     const isPlayer = character.isPlayerControlled;
     const isAlive = character.currentHp > 0;
     const hpPercentage = (character.currentHp / character.stats.hp) * 100;
-    
+
     return (
-      <View 
+      <View
         key={`${character.id}-${index}`}
         style={[
           styles.characterContainer,
-          !isAlive && styles.defeatedCharacter
+          !isAlive && styles.defeatedCharacter,
         ]}
       >
         <View style={styles.characterInfo}>
@@ -247,26 +261,30 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           </Text>
           <Text style={styles.characterLevel}>Lv. {character.level}</Text>
         </View>
-        
+
         <View style={styles.characterStats}>
           <View style={styles.hpContainer}>
             <Text style={styles.hpText}>
               HP: {character.currentHp}/{character.stats.hp}
             </Text>
             <View style={styles.hpBarBg}>
-              <View 
+              <View
                 style={[
                   styles.hpBarFill,
-                  { 
+                  {
                     width: `${hpPercentage}%`,
-                    backgroundColor: hpPercentage > 50 ? '#32CD32' : 
-                                   hpPercentage > 25 ? '#FFD700' : '#DC143C'
-                  }
-                ]} 
+                    backgroundColor:
+                      hpPercentage > 50
+                        ? "#32CD32"
+                        : hpPercentage > 25
+                        ? "#FFD700"
+                        : "#DC143C",
+                  },
+                ]}
               />
             </View>
           </View>
-          
+
           {renderActionMeter(character)}
           {renderMoveCooldowns(character)}
         </View>
@@ -284,7 +302,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     }
 
     const activeCharacter = battleState.characters.find(
-      char => char.isPlayerControlled && char.actionMeter >= 100
+      (char) => char.isPlayerControlled && char.actionMeter >= 100
     );
 
     if (!activeCharacter) {
@@ -300,34 +318,20 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
         <Text style={styles.activeCharacterText}>
           {activeCharacter.name}'s Turn
         </Text>
-        
+
         <View style={styles.actionButtonsRow}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.actionButton}
-            onPress={() => handleActionSelect('attack')}
+            onPress={() => handleActionSelect("attack")}
           >
             <Text style={styles.actionButtonText}>⚔️ Attack</Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={styles.actionButton}
-            onPress={() => handleActionSelect('move')}
-          >
-            <Text style={styles.actionButtonText}>✨ Move</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={styles.actionButton}
-            onPress={() => handleActionSelect('item')}
+            onPress={() => handleActionSelect("item")}
           >
             <Text style={styles.actionButtonText}>🧪 Item</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={styles.actionButton}
-            onPress={() => handleActionSelect('guard')}
-          >
-            <Text style={styles.actionButtonText}>🛡️ Guard</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -341,7 +345,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
       <View style={styles.targetSelectionOverlay}>
         <View style={styles.targetSelectionContainer}>
           <Text style={styles.targetSelectionTitle}>Select Target</Text>
-          
+
           <ScrollView style={styles.targetsList}>
             {availableTargets.map((target, index) => (
               <TouchableOpacity
@@ -356,8 +360,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
               </TouchableOpacity>
             ))}
           </ScrollView>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={styles.cancelButton}
             onPress={resetSelection}
           >
@@ -376,11 +380,9 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     );
   }
 
+  const mapBgSource = mapImages[currentMap?.backgroundImage ?? "default"] || {};
   return (
-    <ImageBackground 
-      source={{ uri: 'https://via.placeholder.com/800x600/4a148c/ffffff?text=Battle+Arena' }}
-      style={styles.container}
-    >
+    <ImageBackground source={mapBgSource} style={styles.container}>
       <View style={styles.overlay}>
         {/* Battle field */}
         <View style={styles.battleField}>
@@ -388,25 +390,23 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           <View style={styles.playerParty}>
             <Text style={styles.partyLabel}>Your Party</Text>
             {battleState.characters
-              .filter(char => char.isPlayerControlled)
-              .map((char, index) => renderCharacter(char, index))
-            }
+              .filter((char) => char.isPlayerControlled)
+              .map((char, index) => renderCharacter(char, index))}
           </View>
-          
+
           {/* Enemy party */}
           <View style={styles.enemyParty}>
             <Text style={styles.partyLabel}>Enemies</Text>
             {battleState.characters
-              .filter(char => !char.isPlayerControlled)
-              .map((char, index) => renderCharacter(char, index))
-            }
+              .filter((char) => !char.isPlayerControlled)
+              .map((char, index) => renderCharacter(char, index))}
           </View>
         </View>
 
         {/* Battle log */}
         <View style={styles.battleLogContainer}>
           <Text style={styles.battleLogTitle}>Battle Log</Text>
-          <ScrollView 
+          <ScrollView
             ref={battleLogRef}
             style={styles.battleLog}
             showsVerticalScrollIndicator={false}
@@ -420,9 +420,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
         </View>
 
         {/* Action controls */}
-        <View style={styles.controlsContainer}>
-          {renderActionButtons()}
-        </View>
+        <View style={styles.controlsContainer}>{renderActionButtons()}</View>
 
         {/* Target selection overlay */}
         {renderTargetSelection()}
@@ -439,21 +437,21 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#1a1a2e',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#1a1a2e",
   },
   loadingText: {
     fontSize: 18,
-    color: '#FFD700',
+    color: "#FFD700",
   },
   battleField: {
     flex: 1,
-    flexDirection: 'row',
+    flexDirection: "row",
     padding: 20,
   },
   playerParty: {
@@ -466,44 +464,44 @@ const styles = StyleSheet.create({
   },
   partyLabel: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#FFD700',
-    textAlign: 'center',
+    fontWeight: "bold",
+    color: "#FFD700",
+    textAlign: "center",
     marginBottom: 10,
-    textShadowColor: '#000',
+    textShadowColor: "#000",
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
   characterContainer: {
-    backgroundColor: 'rgba(26, 26, 46, 0.9)',
+    backgroundColor: "rgba(26, 26, 46, 0.9)",
     borderRadius: 8,
     padding: 12,
     marginVertical: 5,
     borderWidth: 1,
-    borderColor: '#FFD700',
+    borderColor: "#FFD700",
   },
   defeatedCharacter: {
     opacity: 0.5,
-    backgroundColor: 'rgba(128, 0, 0, 0.6)',
-    borderColor: '#800000',
+    backgroundColor: "rgba(128, 0, 0, 0.6)",
+    borderColor: "#800000",
   },
   characterInfo: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 8,
   },
   characterName: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#FFD700',
+    fontWeight: "bold",
+    color: "#FFD700",
   },
   playerName: {
-    color: '#87CEEB',
+    color: "#87CEEB",
   },
   characterLevel: {
     fontSize: 12,
-    color: '#C0C0C0',
+    color: "#C0C0C0",
   },
   characterStats: {
     gap: 5,
@@ -513,53 +511,53 @@ const styles = StyleSheet.create({
   },
   hpText: {
     fontSize: 12,
-    color: '#C0C0C0',
+    color: "#C0C0C0",
     marginBottom: 2,
   },
   hpBarBg: {
     height: 8,
-    backgroundColor: '#333',
+    backgroundColor: "#333",
     borderRadius: 4,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   hpBarFill: {
-    height: '100%',
+    height: "100%",
     borderRadius: 4,
   },
   actionMeterContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   actionMeterBg: {
     flex: 1,
     height: 6,
-    backgroundColor: '#333',
+    backgroundColor: "#333",
     borderRadius: 3,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   actionMeterFill: {
-    height: '100%',
+    height: "100%",
     borderRadius: 3,
   },
   actionMeterText: {
     fontSize: 10,
-    color: '#FFD700',
-    fontWeight: 'bold',
+    color: "#FFD700",
+    fontWeight: "bold",
     minWidth: 45,
-    textAlign: 'right',
+    textAlign: "right",
   },
   battleLogContainer: {
     height: 120,
-    backgroundColor: 'rgba(26, 26, 46, 0.95)',
+    backgroundColor: "rgba(26, 26, 46, 0.95)",
     borderTopWidth: 2,
-    borderTopColor: '#FFD700',
+    borderTopColor: "#FFD700",
     padding: 10,
   },
   battleLogTitle: {
     fontSize: 14,
-    fontWeight: 'bold',
-    color: '#FFD700',
+    fontWeight: "bold",
+    color: "#FFD700",
     marginBottom: 5,
   },
   battleLog: {
@@ -567,78 +565,78 @@ const styles = StyleSheet.create({
   },
   battleLogMessage: {
     fontSize: 12,
-    color: '#C0C0C0',
+    color: "#C0C0C0",
     marginVertical: 1,
   },
   controlsContainer: {
-    backgroundColor: 'rgba(26, 26, 46, 0.95)',
+    backgroundColor: "rgba(26, 26, 46, 0.95)",
     borderTopWidth: 2,
-    borderTopColor: '#FFD700',
+    borderTopColor: "#FFD700",
     padding: 15,
   },
   waitingContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 20,
   },
   waitingText: {
     fontSize: 16,
-    color: '#C0C0C0',
-    fontStyle: 'italic',
+    color: "#C0C0C0",
+    fontStyle: "italic",
   },
   actionButtonsContainer: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   activeCharacterText: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#FFD700',
+    fontWeight: "bold",
+    color: "#FFD700",
     marginBottom: 10,
   },
   actionButtonsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
   },
   actionButton: {
-    backgroundColor: 'rgba(255, 215, 0, 0.9)',
+    backgroundColor: "rgba(255, 215, 0, 0.9)",
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#FFD700',
+    borderColor: "#FFD700",
     minWidth: 80,
-    alignItems: 'center',
+    alignItems: "center",
   },
   actionButtonText: {
     fontSize: 12,
-    fontWeight: 'bold',
-    color: '#1a1a2e',
-    textAlign: 'center',
+    fontWeight: "bold",
+    color: "#1a1a2e",
+    textAlign: "center",
   },
   targetSelectionOverlay: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   targetSelectionContainer: {
-    backgroundColor: 'rgba(26, 26, 46, 0.95)',
+    backgroundColor: "rgba(26, 26, 46, 0.95)",
     borderRadius: 12,
     padding: 20,
-    width: '80%',
-    maxHeight: '60%',
+    width: "80%",
+    maxHeight: "60%",
     borderWidth: 2,
-    borderColor: '#FFD700',
+    borderColor: "#FFD700",
   },
   targetSelectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#FFD700',
-    textAlign: 'center',
+    fontWeight: "bold",
+    color: "#FFD700",
+    textAlign: "center",
     marginBottom: 15,
   },
   targetsList: {
@@ -646,50 +644,50 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   targetButton: {
-    backgroundColor: 'rgba(255, 215, 0, 0.1)',
+    backgroundColor: "rgba(255, 215, 0, 0.1)",
     borderWidth: 1,
-    borderColor: '#FFD700',
+    borderColor: "#FFD700",
     borderRadius: 6,
     padding: 15,
     marginVertical: 5,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   targetButtonText: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#FFD700',
+    fontWeight: "bold",
+    color: "#FFD700",
   },
   targetButtonHp: {
     fontSize: 12,
-    color: '#C0C0C0',
+    color: "#C0C0C0",
   },
   cancelButton: {
-    backgroundColor: 'rgba(220, 20, 60, 0.9)',
+    backgroundColor: "rgba(220, 20, 60, 0.9)",
     paddingVertical: 12,
     borderRadius: 6,
-    alignItems: 'center',
+    alignItems: "center",
   },
   cancelButtonText: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: 'white',
+    fontWeight: "bold",
+    color: "white",
   },
   cooldownContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 4,
     marginTop: 2,
   },
   cooldownItem: {
-    backgroundColor: 'rgba(220, 20, 60, 0.8)',
+    backgroundColor: "rgba(220, 20, 60, 0.8)",
     paddingHorizontal: 4,
     paddingVertical: 1,
     borderRadius: 3,
   },
   cooldownText: {
     fontSize: 8,
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
   },
 });

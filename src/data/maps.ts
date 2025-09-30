@@ -61,3 +61,10 @@ export const MAPS: GameMap[] = [
     ],
   },
 ];
+
+// Map image mapping (add all used images here)
+export const mapImages: { [key: string]: any } = {
+  "ice_dungeon_01.png": require("../../assets/maps/ice_dungeon_01.png"),
+  "ice_dungeon_02.png": require("../../assets/maps/ice_dungeon_02.png"),
+  "ice_dungeon_03.png": require("../../assets/maps/ice_dungeon_03.png"),
+};
