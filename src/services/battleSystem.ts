@@ -46,6 +46,13 @@ export class BattleSystem {
 
     // Add enemy characters
     enemies.forEach((enemy, index) => {
+      let selectedImage = null;
+      if (Array.isArray(enemy.image)) {
+        const arr = enemy.image;
+        selectedImage = arr[Math.floor(Math.random() * arr.length)];
+      } else {
+        selectedImage = enemy.image;
+      }
       characters.push({
         id: `enemy_${index}`,
         name: enemy.name,
@@ -59,7 +66,7 @@ export class BattleSystem {
         actionMeter: 0,
         isPlayerControlled: false,
         moveCooldowns: {},
-        image: enemy.image,
+        image: selectedImage,
       });
     });
 
