@@ -34,6 +34,7 @@ export const MOVES: Move[] = [
     },
     baseCooldown: 0,
     targetType: "single",
+    animation: "attack-shake",
   },
   {
     id: "slash",
@@ -47,6 +48,7 @@ export const MOVES: Move[] = [
     },
     baseCooldown: 1,
     targetType: "single",
+    animation: "attack-slash",
   },
   {
     id: "power_strike",
@@ -60,6 +62,7 @@ export const MOVES: Move[] = [
     },
     baseCooldown: 3,
     targetType: "single",
+    animation: "attack-strike",
   },
 
   // Magic Moves
@@ -75,6 +78,7 @@ export const MOVES: Move[] = [
     },
     baseCooldown: 2,
     targetType: "single",
+    animation: "attack-pulse",
   },
   {
     id: "ice_shard",
@@ -88,6 +92,7 @@ export const MOVES: Move[] = [
     },
     baseCooldown: 2,
     targetType: "single",
+    animation: "attack-pulse",
   },
   {
     id: "lightning_bolt",
@@ -101,6 +106,7 @@ export const MOVES: Move[] = [
     },
     baseCooldown: 4,
     targetType: "single",
+    animation: "attack-flash",
   },
 
   // Healing Moves
@@ -116,6 +122,7 @@ export const MOVES: Move[] = [
     },
     baseCooldown: 2,
     targetType: "single",
+    animation: "heal-glow",
     effects: {
       heal: 1.0, // Multiplier for healing amount
     },
@@ -132,6 +139,7 @@ export const MOVES: Move[] = [
     },
     baseCooldown: 5,
     targetType: "all_allies",
+    animation: "heal-glow",
     effects: {
       heal: 1.0,
     },
@@ -150,6 +158,7 @@ export const MOVES: Move[] = [
     },
     baseCooldown: 0,
     targetType: "self",
+    animation: "defend-pulse",
     effects: {
       buffStats: { defense: 5 },
       duration: 1,
@@ -167,6 +176,7 @@ export const MOVES: Move[] = [
     },
     baseCooldown: 3,
     targetType: "single",
+    animation: "defend-pulse",
     effects: {
       buffStats: { defense: 8, hp: 10 },
       duration: 3,
@@ -186,6 +196,7 @@ export const MOVES: Move[] = [
     },
     baseCooldown: 1,
     targetType: "single",
+    animation: "attack-bounce",
   },
   {
     id: "freeze",
@@ -199,6 +210,7 @@ export const MOVES: Move[] = [
     },
     baseCooldown: 2,
     targetType: "single",
+    animation: "attack-pulse",
     effects: {
       debuffStats: { speed: -3 },
       duration: 2,
@@ -218,6 +230,7 @@ export const MOVES: Move[] = [
     },
     baseCooldown: 4,
     targetType: "all_enemies",
+    animation: "attack-spin",
   },
   {
     id: "meteor",
@@ -231,5 +244,6 @@ export const MOVES: Move[] = [
     },
     baseCooldown: 6,
     targetType: "all_enemies",
+    animation: "attack-flash",
   },
 ];
