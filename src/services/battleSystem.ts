@@ -202,20 +202,35 @@ export class BattleSystem {
   private executeAction(action: BattleAction): void {
     const { source, target, type } = action;
 
+    // Clear any existing animation
+    source.currentAnimation = undefined;
+
     switch (type) {
       case "attack":
+        source.currentAnimation = "attack-shake";
         this.performAttack(source, target!);
         break;
       case "move":
+        const move = this.getMoveById(action.moveId!);
+        if (move?.animation) {
+          source.currentAnimation = move.animation;
+        }
         this.performMove(source, target, action.moveId!);
         break;
       case "guard":
+        source.currentAnimation = "defend-pulse";
         this.performGuard(source);
         break;
       case "item":
         this.performItemUse(source, target, action.itemId!);
         break;
     }
+
+    // Clear animation after a delay
+    setTimeout(() => {
+      source.currentAnimation = undefined;
+      this.onStateChange({ ...this.battleState });
+    }, 500);
 
     // Advance turn and update cooldowns
     this.battleState.currentTurn++;

@@ -268,16 +268,31 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
       imageSource = require("../../assets/monsters/Boss Mythical Knight Goldnharl.png");
     }
 
+    // Apply animation class if present
+    const animationStyle = character.currentAnimation
+      ? styles[character.currentAnimation as keyof typeof styles] || {}
+      : {};
+
     return (
       <View
         key={`${character.id}-${index}`}
-        style={[styles.battlerSlot, !isAlive && styles.defeatedCharacter]}
+        style={[
+          styles.battlerSlot,
+          !isAlive && styles.defeatedCharacter,
+          !isPlayer && styles.enemySlot,
+        ]}
       >
         {imageSource && (
-          <Image source={imageSource} style={imageStyle} resizeMode="contain" />
+          <Image
+            source={imageSource}
+            style={[imageStyle, animationStyle]}
+            resizeMode="contain"
+          />
         )}
         <View style={styles.battlerStatsOverlay}>
           <Text style={styles.battlerName}>{character.name}</Text>
+          
+          {/* HP Bar */}
           <View style={styles.battlerHpBarBg}>
             <View
               style={[
@@ -294,12 +309,20 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
               ]}
             />
           </View>
-
           <Text style={styles.battlerHpText}>
             {character.currentHp}/{character.stats.hp} HP
           </Text>
+          
+          {/* Action Meter */}
           {renderActionMeter(character)}
+          
+          {/* Cooldowns */}
           {renderMoveCooldowns(character)}
+          
+          {/* Potential Display */}
+          {character.potential !== undefined && character.potential > 0 && (
+            <Text style={styles.potentialText}>⚡ {character.potential}</Text>
+          )}
         </View>
       </View>
     );
@@ -307,11 +330,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
 
   const renderActionButtons = () => {
     if (!battleState?.isPlayerTurn) {
-      return (
-        <View style={styles.waitingContainer}>
-          <Text style={styles.waitingText}>Waiting for your turn...</Text>
-        </View>
-      );
+      return null; // Hide completely when not player turn
     }
 
     const activeCharacter = battleState.characters.find(
@@ -319,34 +338,28 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     );
 
     if (!activeCharacter) {
-      return (
-        <View style={styles.waitingContainer}>
-          <Text style={styles.waitingText}>Charging action meter...</Text>
-        </View>
-      );
+      return null; // Hide completely when no character is ready
     }
 
     return (
-      <View style={styles.actionButtonsContainer}>
+      <View style={styles.actionButtonsCentered}>
         <Text style={styles.activeCharacterText}>
           {activeCharacter.name}'s Turn
         </Text>
 
-        <View style={styles.actionButtonsRow}>
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => handleActionSelect("attack")}
-          >
-            <Text style={styles.actionButtonText}>⚔️ Attack</Text>
-          </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.actionButtonVertical}
+          onPress={() => handleActionSelect("attack")}
+        >
+          <Text style={styles.actionButtonText}>⚔️ Attack</Text>
+        </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={() => handleActionSelect("item")}
-          >
-            <Text style={styles.actionButtonText}>🧪 Item</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          style={styles.actionButtonVertical}
+          onPress={() => handleActionSelect("item")}
+        >
+          <Text style={styles.actionButtonText}>🧪 Item</Text>
+        </TouchableOpacity>
       </View>
     );
   };
@@ -412,9 +425,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
         </ScrollView>
       </View>
 
-      {/* Action controls */}
-      <View style={styles.controlsContainer}>{renderActionButtons()}</View>
-
       <View style={styles.overlay}>
         {/* Battle field */}
         <View style={styles.battleField}>
@@ -425,13 +435,16 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
               .map((char, index) => renderCharacter(char, index))}
           </View>
 
-          {/* Enemy party */}
+          {/* Enemy party with overlapping layout */}
           <View style={styles.enemyParty}>
             {battleState.characters
               .filter((char) => !char.isPlayerControlled)
               .map((char, index) => renderCharacter(char, index))}
           </View>
         </View>
+
+        {/* Centered action buttons (only visible when player turn) */}
+        {renderActionButtons()}
 
         {/* Target selection overlay */}
         {renderTargetSelection()}
@@ -486,7 +499,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "flex-end",
-    gap: 40,
+    paddingRight: 20,
+  },
+  enemySlot: {
+    marginLeft: -30, // Create overlapping effect
+    zIndex: 1,
   },
   partyLabel: {
     fontSize: 18,
@@ -592,6 +609,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
+    marginTop: 2,
   },
   actionMeterBg: {
     flex: 1,
@@ -650,11 +668,24 @@ const styles = StyleSheet.create({
   actionButtonsContainer: {
     alignItems: "center",
   },
+  actionButtonsCentered: {
+    position: "absolute",
+    top: "40%",
+    alignSelf: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(26, 26, 46, 0.95)",
+    borderRadius: 12,
+    padding: 20,
+    borderWidth: 2,
+    borderColor: "#FFD700",
+    zIndex: 100,
+  },
   activeCharacterText: {
     fontSize: 16,
     fontWeight: "bold",
     color: "#FFD700",
-    marginBottom: 10,
+    marginBottom: 15,
+    textAlign: "center",
   },
   actionButtonsRow: {
     flexDirection: "row",
@@ -671,8 +702,19 @@ const styles = StyleSheet.create({
     minWidth: 80,
     alignItems: "center",
   },
+  actionButtonVertical: {
+    backgroundColor: "rgba(255, 215, 0, 0.9)",
+    paddingVertical: 15,
+    paddingHorizontal: 40,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: "#FFD700",
+    minWidth: 150,
+    alignItems: "center",
+    marginVertical: 8,
+  },
   actionButtonText: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "bold",
     color: "#1a1a2e",
     textAlign: "center",
@@ -686,6 +728,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.8)",
     justifyContent: "center",
     alignItems: "center",
+    zIndex: 200,
   },
   targetSelectionContainer: {
     backgroundColor: "rgba(26, 26, 46, 0.95)",
@@ -753,5 +796,39 @@ const styles = StyleSheet.create({
     fontSize: 8,
     color: "white",
     fontWeight: "bold",
+  },
+  potentialText: {
+    fontSize: 11,
+    color: "#FFD700",
+    fontWeight: "bold",
+    marginTop: 2,
+  },
+  // Animation styles
+  "attack-shake": {
+    transform: [{ translateX: 5 }],
+  },
+  "attack-slash": {
+    transform: [{ rotate: "15deg" }],
+  },
+  "attack-strike": {
+    transform: [{ scale: 1.1 }],
+  },
+  "attack-pulse": {
+    opacity: 0.8,
+  },
+  "attack-flash": {
+    opacity: 0.6,
+  },
+  "attack-bounce": {
+    transform: [{ translateY: -10 }],
+  },
+  "attack-spin": {
+    transform: [{ rotate: "45deg" }],
+  },
+  "heal-glow": {
+    opacity: 0.9,
+  },
+  "defend-pulse": {
+    transform: [{ scale: 0.95 }],
   },
 });

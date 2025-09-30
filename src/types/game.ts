@@ -24,6 +24,7 @@ export interface Move {
     debuffStats?: Partial<Stats>;
     duration?: number;
   };
+  animation?: string; // CSS animation class name
 }
 
 export interface DropItem {
@@ -60,6 +61,8 @@ export interface Character {
     armor?: string;
     accessory?: string;
   };
+  potential?: number; // Potential for gaining experience (10-20)
+  baseStats?: Stats; // Original base stats before randomization
 }
 
 export interface BattleCharacter extends Character {
@@ -70,6 +73,7 @@ export interface BattleCharacter extends Character {
   image?: string | string[];
   imageWidth?: number;
   imageHeight?: number;
+  currentAnimation?: string; // Current attack animation playing
 }
 
 export interface MapMonster {

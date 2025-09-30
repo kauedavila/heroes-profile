@@ -166,7 +166,6 @@ export default function App() {
 
       if (rewards) {
         updatedGameState.player.gold += rewards.gold || 0;
-        updatedGameState.player.experience += rewards.experience || 0;
 
         // Add items to inventory
         if (rewards.items) {
@@ -182,38 +181,49 @@ export default function App() {
         updatedGameState.completedMaps.push(currentMap.id);
       }
 
-      // Level up check (simplified)
-      const expNeeded = updatedGameState.player.level * 100;
-      if (updatedGameState.player.experience >= expNeeded) {
-        updatedGameState.player.level++;
-        updatedGameState.player.experience -= expNeeded;
-
-        Alert.alert(
-          "Level Up!",
-          `You reached level ${updatedGameState.player.level}!`
-        );
-      }
-
-      // Update party experience and stats
+      // Update party: decrease potential and grant experience
       updatedGameState.party.forEach((character) => {
-        character.experience += Math.floor(
-          (rewards?.experience || 0) / updatedGameState.party.length
-        );
+        // Decrease potential by 1 per round
+        if (character.potential !== undefined && character.potential > 0) {
+          character.potential = Math.max(0, character.potential - 1);
+        }
 
-        // Simple level up for characters
-        const charExpNeeded = character.level * 80;
-        if (character.experience >= charExpNeeded) {
-          character.level++;
-          character.experience -= charExpNeeded;
+        // Only gain experience if potential > 0
+        if (character.potential === undefined || character.potential > 0) {
+          character.experience += Math.floor(
+            (rewards?.experience || 0) / updatedGameState.party.length
+          );
 
-          // Increase stats
-          character.stats.hp += 5;
-          character.stats.attack += 2;
-          character.stats.defense += 1;
-          character.stats.speed += 1;
-          character.stats.magic += 1;
+          // Simple level up for characters
+          const charExpNeeded = character.level * 80;
+          if (character.experience >= charExpNeeded) {
+            character.level++;
+            character.experience -= charExpNeeded;
+
+            // Increase stats
+            character.stats.hp += 5;
+            character.stats.attack += 2;
+            character.stats.defense += 1;
+            character.stats.speed += 1;
+            character.stats.magic += 1;
+          }
         }
       });
+
+      // Update player level to be the average of party levels (minimum 1)
+      const partyAverageLevel =
+        updatedGameState.party.length > 0
+          ? Math.max(
+              1,
+              Math.floor(
+                updatedGameState.party.reduce(
+                  (sum, char) => sum + char.level,
+                  0
+                ) / updatedGameState.party.length
+              )
+            )
+          : 1;
+      updatedGameState.player.level = partyAverageLevel;
 
       setGameState(updatedGameState);
       await storageService.saveGameState(updatedGameState);
@@ -285,6 +295,23 @@ export default function App() {
       return;
     }
 
+    // Randomize stats: each stat can be 0.5x to 2x the base value
+    const randomizeStat = (baseStat: number): number => {
+      const multiplier = 0.5 + Math.random() * 1.5; // 0.5 to 2.0
+      return Math.round(baseStat * multiplier);
+    };
+
+    const randomizedStats = {
+      hp: randomizeStat(recruitmentChar.stats.hp),
+      attack: randomizeStat(recruitmentChar.stats.attack),
+      defense: randomizeStat(recruitmentChar.stats.defense),
+      speed: randomizeStat(recruitmentChar.stats.speed),
+      magic: randomizeStat(recruitmentChar.stats.magic),
+    };
+
+    // Generate random potential between 10 and 20
+    const potential = 10 + Math.floor(Math.random() * 11); // 10 to 20
+
     const newCharacter = {
       id: `recruited_${Date.now()}`,
       name: `${
@@ -293,10 +320,12 @@ export default function App() {
       }`,
       class: recruitmentChar.class,
       level: recruitmentChar.level,
-      stats: { ...recruitmentChar.stats },
+      stats: randomizedStats,
+      baseStats: { ...recruitmentChar.stats }, // Store original base stats
       experience: 0,
       moves: ["basic_attack", "guard"], // Basic moves
       equipment: {},
+      potential: potential,
     };
 
     const updatedGameState = { ...gameState };
@@ -308,7 +337,7 @@ export default function App() {
 
     Alert.alert(
       "Recruitment Successful!",
-      `${newCharacter.name} has joined your party!`,
+      `${newCharacter.name} has joined your party with ${potential} potential!`,
       [{ text: "Continue", onPress: () => setCurrentScreen("worldMap") }]
     );
   };
