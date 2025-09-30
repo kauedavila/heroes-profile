@@ -248,15 +248,11 @@ export class BattleSystem {
   private updateCooldowns(): void {
     this.battleState.characters.forEach((character) => {
       if (character.currentHp > 0) {
-        // Reduce cooldowns based on agility (speed)
-        // Higher agility reduces cooldowns faster
-        const agilityBonus = Math.max(0.1, character.stats.speed / 100);
-
         for (const moveId in character.moveCooldowns) {
           if (character.moveCooldowns[moveId] > 0) {
             character.moveCooldowns[moveId] = Math.max(
               0,
-              character.moveCooldowns[moveId] - (1 + agilityBonus)
+              character.moveCooldowns[moveId]
             );
           }
         }
@@ -290,9 +286,8 @@ export class BattleSystem {
         move.damageRatio.level * caster.level
     );
 
-    // Apply cooldown (modified by agility for realism)
-    const cooldownReduction = Math.max(0, caster.stats.speed / 20);
-    const actualCooldown = Math.max(0, move.baseCooldown - cooldownReduction);
+    // Apply cooldown
+    const actualCooldown = Math.max(0, move.baseCooldown);
     if (actualCooldown > 0) {
       caster.moveCooldowns[moveId] = actualCooldown;
     }

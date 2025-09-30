@@ -290,8 +290,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           />
         )}
         <View style={styles.battlerStatsOverlay}>
-          <Text style={styles.battlerName}>{character.name}</Text>
-          
           {/* HP Bar */}
           <View style={styles.battlerHpBarBg}>
             <View
@@ -309,16 +307,13 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
               ]}
             />
           </View>
-          <Text style={styles.battlerHpText}>
-            {character.currentHp}/{character.stats.hp} HP
-          </Text>
-          
+
           {/* Action Meter */}
           {renderActionMeter(character)}
-          
+
           {/* Cooldowns */}
           {renderMoveCooldowns(character)}
-          
+
           {/* Potential Display */}
           {character.potential !== undefined && character.potential > 0 && (
             <Text style={styles.potentialText}>⚡ {character.potential}</Text>
@@ -537,11 +532,9 @@ const styles = StyleSheet.create({
   },
   battlerStatsOverlay: {
     position: "absolute",
-    bottom: -54,
-    left: 0,
-    right: 0,
-    alignItems: "center",
-    backgroundColor: "rgba(26,26,46,0.85)",
+    bottom: -20,
+    flexDirection: "column",
+    alignItems: "flex-start",
     borderRadius: 10,
     paddingVertical: 8,
     paddingHorizontal: 10,
