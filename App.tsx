@@ -34,6 +34,13 @@ export default function App() {
       const savedState = await storageService.loadGameState();
       if (savedState) {
         setGameState(savedState);
+        // Restore the current screen, defaulting to worldMap if in battle
+        if (savedState.currentScreen && savedState.currentScreen !== 'battle') {
+          setCurrentScreen(savedState.currentScreen);
+        } else if (savedState.currentScreen === 'battle' && savedState.currentBattle) {
+          // Restore battle state if available
+          setCurrentScreen('worldMap'); // For now, go to world map instead of battle
+        }
       }
     } catch (error) {
       console.error('Error initializing game:', error);
@@ -64,6 +71,19 @@ export default function App() {
       'Game options and settings will be available in future updates.',
       [{ text: 'OK' }]
     );
+  };
+
+  const saveGameStateWithContext = async (screen: GameScreen, battleContext?: any) => {
+    if (!gameState) return;
+    
+    const updatedGameState = {
+      ...gameState,
+      currentScreen: screen,
+      currentBattle: battleContext
+    };
+    
+    setGameState(updatedGameState);
+    await storageService.saveGameState(updatedGameState);
   };
 
   const handleMapSelect = async (mapId: string) => {
@@ -116,6 +136,14 @@ export default function App() {
       }
 
       setBattleEnemies(battleEnemies);
+      
+      // Save game state with battle context
+      const battleContext = {
+        mapId: map.id,
+        enemies: firstRoundMonsters.map(m => m.id)
+      };
+      await saveGameStateWithContext('battle', battleContext);
+      
       setCurrentScreen('battle');
     } catch (error) {
       Alert.alert('Error', 'Failed to start battle.');
@@ -180,7 +208,10 @@ export default function App() {
       Alert.alert(
         'Victory!',
         `Gained ${rewards?.gold || 0} gold and ${rewards?.experience || 0} experience!`,
-        [{ text: 'Continue', onPress: () => setCurrentScreen('worldMap') }]
+        [{ text: 'Continue', onPress: async () => {
+          await saveGameStateWithContext('worldMap');
+          setCurrentScreen('worldMap');
+        } }]
       );
     } else {
       Alert.alert(
@@ -189,12 +220,12 @@ export default function App() {
         [
           { 
             text: 'Continue', 
-            onPress: () => {
+            onPress: async () => {
               // Lose some gold as penalty
               const updatedGameState = { ...gameState };
               updatedGameState.player.gold = Math.max(0, Math.floor(gameState.player.gold * 0.8));
               setGameState(updatedGameState);
-              storageService.saveGameState(updatedGameState);
+              await saveGameStateWithContext('worldMap');
               setCurrentScreen('worldMap');
             }
           }
@@ -238,7 +269,7 @@ export default function App() {
       level: recruitmentChar.level,
       stats: { ...recruitmentChar.stats },
       experience: 0,
-      abilities: ['Attack', 'Guard'], // Basic abilities
+      moves: ['basic_attack', 'guard'], // Basic moves
       equipment: {}
     };
 
@@ -294,7 +325,7 @@ export default function App() {
       );
 
     case 'battle':
-      if (!gameState || battleEnemies.length === 0) {
+      if (!gameState || battleEnemies.length === 0 || !gameDataService) {
         setCurrentScreen('worldMap');
         return null;
       }
@@ -303,6 +334,7 @@ export default function App() {
           <BattleScreen
             playerParty={gameState.party}
             enemies={battleEnemies}
+            gameDataService={gameDataService}
             onBattleEnd={handleBattleEnd}
           />
           <StatusBar style="light" />

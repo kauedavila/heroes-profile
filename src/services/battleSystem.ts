@@ -4,19 +4,24 @@ import {
   BattleState,
   Character,
   Monster,
+  Move,
 } from "../types/game";
+import { GameDataService } from "./gameDataService";
 
 export class BattleSystem {
   private battleState: BattleState;
   private onStateChange: (state: BattleState) => void;
   private battleTimer: NodeJS.Timeout | null = null;
+  private gameDataService: GameDataService;
 
   constructor(
     playerParty: Character[],
     enemies: Monster[],
-    onStateChange: (state: BattleState) => void
+    onStateChange: (state: BattleState) => void,
+    gameDataService: GameDataService
   ) {
     this.onStateChange = onStateChange;
+    this.gameDataService = gameDataService;
     this.battleState = this.initializeBattle(playerParty, enemies);
   }
 
@@ -34,6 +39,7 @@ export class BattleSystem {
         currentHp: char.stats.hp,
         actionMeter: 0,
         isPlayerControlled: true,
+        moveCooldowns: {},
       });
     });
 
@@ -46,11 +52,12 @@ export class BattleSystem {
         level: enemy.level,
         stats: { ...enemy.stats },
         experience: 0,
-        abilities: enemy.abilities,
+        moves: enemy.moves,
         equipment: {},
         currentHp: enemy.stats.hp,
         actionMeter: 0,
         isPlayerControlled: false,
+        moveCooldowns: {},
       });
     });
 
@@ -58,6 +65,7 @@ export class BattleSystem {
       characters,
       currentRound: 1,
       totalRounds: 1,
+      currentTurn: 0,
       isPlayerTurn: false,
       actionQueue: [],
       battleLog: ["Battle begins!"],
@@ -131,14 +139,31 @@ export class BattleSystem {
       return;
     }
 
-    // Simple AI: attack random player character
-    const target =
-      playerCharacters[Math.floor(Math.random() * playerCharacters.length)];
-    const action: BattleAction = {
-      type: "attack",
-      source: character,
-      target,
-    };
+    // Simple AI: choose random available move or basic attack
+    let action: BattleAction;
+    const availableMoves = character.moves.filter(moveId => 
+      this.getMoveById(moveId) && (character.moveCooldowns[moveId] || 0) <= 0
+    );
+
+    if (availableMoves.length > 0 && Math.random() > 0.3) {
+      // 70% chance to use a move instead of basic attack
+      const moveId = availableMoves[Math.floor(Math.random() * availableMoves.length)];
+      const target = playerCharacters[Math.floor(Math.random() * playerCharacters.length)];
+      action = {
+        type: "move",
+        source: character,
+        target,
+        moveId,
+      };
+    } else {
+      // Basic attack
+      const target = playerCharacters[Math.floor(Math.random() * playerCharacters.length)];
+      action = {
+        type: "attack",
+        source: character,
+        target,
+      };
+    }
 
     this.executeAction(action);
   }
@@ -155,6 +180,10 @@ export class BattleSystem {
     this.startBattle();
   }
 
+  private getMoveById(moveId: string): Move | null {
+    return this.gameDataService.getMoveById(moveId);
+  }
+
   private executeAction(action: BattleAction): void {
     const { source, target, type } = action;
 
@@ -162,8 +191,8 @@ export class BattleSystem {
       case "attack":
         this.performAttack(source, target!);
         break;
-      case "ability":
-        this.performAbility(source, target, action.abilityId!);
+      case "move":
+        this.performMove(source, target, action.moveId!);
         break;
       case "guard":
         this.performGuard(source);
@@ -173,6 +202,10 @@ export class BattleSystem {
         break;
     }
 
+    // Advance turn and update cooldowns
+    this.battleState.currentTurn++;
+    this.updateCooldowns();
+
     // Reset action meter after action
     source.actionMeter = 0;
 
@@ -180,6 +213,93 @@ export class BattleSystem {
     this.checkBattleEnd();
 
     this.onStateChange({ ...this.battleState });
+  }
+
+  private updateCooldowns(): void {
+    this.battleState.characters.forEach(character => {
+      if (character.currentHp > 0) {
+        // Reduce cooldowns based on agility (speed)
+        // Higher agility reduces cooldowns faster
+        const agilityBonus = Math.max(0.1, character.stats.speed / 100);
+        
+        for (const moveId in character.moveCooldowns) {
+          if (character.moveCooldowns[moveId] > 0) {
+            character.moveCooldowns[moveId] = Math.max(0, 
+              character.moveCooldowns[moveId] - (1 + agilityBonus)
+            );
+          }
+        }
+      }
+    });
+  }
+
+  private performMove(
+    caster: BattleCharacter,
+    target: BattleCharacter | undefined,
+    moveId: string
+  ): void {
+    const move = this.getMoveById(moveId);
+    if (!move || !caster.moves.includes(moveId)) {
+      this.battleState.battleLog.push(`${caster.name} tried to use an unknown move!`);
+      return;
+    }
+
+    // Check if move is on cooldown
+    if ((caster.moveCooldowns[moveId] || 0) > 0) {
+      this.battleState.battleLog.push(`${move.name} is still on cooldown!`);
+      return;
+    }
+
+    // Calculate damage/healing based on move formula
+    const damageAmount = Math.floor(
+      (move.damageRatio.attack * caster.stats.attack) +
+      (move.damageRatio.magic * caster.stats.magic) +
+      (move.damageRatio.level * caster.level)
+    );
+
+    // Apply cooldown (modified by agility for realism)
+    const cooldownReduction = Math.max(0, caster.stats.speed / 20);
+    const actualCooldown = Math.max(0, move.baseCooldown - cooldownReduction);
+    if (actualCooldown > 0) {
+      caster.moveCooldowns[moveId] = actualCooldown;
+    }
+
+    // Handle different move types
+    switch (move.type) {
+      case "physical":
+      case "magical":
+        if (target && damageAmount > 0) {
+          const actualDamage = Math.max(1, damageAmount - target.stats.defense / 2);
+          target.currentHp = Math.max(0, target.currentHp - actualDamage);
+          this.battleState.battleLog.push(
+            `${caster.name} uses ${move.name} on ${target.name} for ${actualDamage} damage!`
+          );
+
+          if (target.currentHp === 0) {
+            this.battleState.battleLog.push(`${target.name} is defeated!`);
+          }
+        }
+        break;
+
+      case "healing":
+        if (target && move.effects?.heal) {
+          const healAmount = Math.floor(damageAmount * move.effects.heal);
+          const actualHealing = Math.min(healAmount, target.stats.hp - target.currentHp);
+          target.currentHp += actualHealing;
+          this.battleState.battleLog.push(
+            `${caster.name} uses ${move.name} on ${target.name} and heals ${actualHealing} HP!`
+          );
+        }
+        break;
+
+      case "buff":
+      case "debuff":
+        // Simple buff/debuff system - could be expanded
+        this.battleState.battleLog.push(
+          `${caster.name} uses ${move.name}! (Effect applied)`
+        );
+        break;
+    }
   }
 
   private performAttack(
@@ -202,52 +322,6 @@ export class BattleSystem {
 
     if (target.currentHp === 0) {
       this.battleState.battleLog.push(`${target.name} is defeated!`);
-    }
-  }
-
-  private performAbility(
-    caster: BattleCharacter,
-    target: BattleCharacter | undefined,
-    abilityId: string
-  ): void {
-    // Simple ability system - could be expanded
-    const ability = caster.abilities.find((ab) => ab === abilityId);
-    if (!ability) return;
-
-    let damage = 0;
-    let healing = 0;
-
-    switch (abilityId) {
-      case "Fireball":
-        damage = Math.floor(caster.stats.magic * 1.5);
-        break;
-      case "Heal":
-        healing = Math.floor(caster.stats.magic * 1.2);
-        break;
-      case "Power Strike":
-        damage = Math.floor(caster.stats.attack * 1.3);
-        break;
-      default:
-        damage = caster.stats.attack;
-    }
-
-    if (target && damage > 0) {
-      const actualDamage = Math.max(1, damage - target.stats.defense / 2);
-      target.currentHp = Math.max(0, target.currentHp - actualDamage);
-      this.battleState.battleLog.push(
-        `${caster.name} uses ${abilityId} on ${target.name} for ${actualDamage} damage!`
-      );
-    }
-
-    if (target && healing > 0) {
-      const actualHealing = Math.min(
-        healing,
-        target.stats.hp - target.currentHp
-      );
-      target.currentHp += actualHealing;
-      this.battleState.battleLog.push(
-        `${caster.name} heals ${target.name} for ${actualHealing} HP!`
-      );
     }
   }
 
