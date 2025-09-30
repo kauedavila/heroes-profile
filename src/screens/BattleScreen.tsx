@@ -21,7 +21,7 @@ import { GameDataService } from "../services/gameDataService";
 import { GameMap } from "../types/game";
 import { mapImages } from "../data/maps";
 import { monsterImages } from "../data/monsters";
-import { Image } from "react-native";
+import { Image, ImageStyle } from "react-native";
 
 interface BattleScreenProps {
   playerParty: Character[];
@@ -251,18 +251,19 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
 
     // Monster image logic
     let imageSource = null;
+    let imageStyle: ImageStyle | ImageStyle[] = styles.battlerImage;
     if (!isPlayer) {
-      let monsterImageKey = null;
-      if (Array.isArray(character.image)) {
-        const arr = character.image;
-        monsterImageKey = arr[Math.floor(Math.random() * arr.length)];
-      } else {
-        monsterImageKey = character.image;
-      }
       imageSource =
-        typeof monsterImageKey === "string"
-          ? monsterImages[monsterImageKey] || null
+        typeof character.image === "string"
+          ? monsterImages[character.image] || null
           : null;
+      if (character.imageWidth || character.imageHeight) {
+        imageStyle = [
+          styles.battlerImage,
+          character.imageWidth ? { width: character.imageWidth } : {},
+          character.imageHeight ? { height: character.imageHeight } : {},
+        ];
+      }
     } else {
       imageSource = require("../../assets/monsters/Boss Mythical Knight Goldnharl.png");
     }
@@ -273,11 +274,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
         style={[styles.battlerSlot, !isAlive && styles.defeatedCharacter]}
       >
         {imageSource && (
-          <Image
-            source={imageSource}
-            style={styles.battlerImage}
-            resizeMode="contain"
-          />
+          <Image source={imageSource} style={imageStyle} resizeMode="contain" />
         )}
         <View style={styles.battlerStatsOverlay}>
           <Text style={styles.battlerName}>{character.name}</Text>

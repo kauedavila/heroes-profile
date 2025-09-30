@@ -35,6 +35,8 @@ export interface Monster {
   id: string;
   name: string;
   image: string | string[];
+  imageWidth?: number;
+  imageHeight?: number;
   level: number;
   stats: Stats;
   moves: string[]; // Move IDs instead of ability names
@@ -66,6 +68,8 @@ export interface BattleCharacter extends Character {
   isPlayerControlled: boolean;
   moveCooldowns: { [moveId: string]: number }; // Remaining cooldown turns for each move
   image?: string | string[];
+  imageWidth?: number;
+  imageHeight?: number;
 }
 
 export interface MapMonster {

@@ -67,6 +67,8 @@ export class BattleSystem {
         isPlayerControlled: false,
         moveCooldowns: {},
         image: selectedImage,
+        imageWidth: enemy.imageWidth,
+        imageHeight: enemy.imageHeight,
       });
     });
 

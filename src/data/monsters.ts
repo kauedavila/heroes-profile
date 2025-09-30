@@ -25,6 +25,8 @@ export const MONSTERS: Monster[] = [
     id: "slime_icei",
     name: "Ice Slime",
     image: ["Slime Icei.png", "Slime Iceii.png", "Slime Iceiii.png"],
+    imageWidth: 140,
+    imageHeight: 140,
     level: 2,
     stats: {
       hp: 30,
