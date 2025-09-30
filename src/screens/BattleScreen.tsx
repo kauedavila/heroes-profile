@@ -383,6 +383,25 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   const mapBgSource = mapImages[currentMap?.backgroundImage ?? "default"] || {};
   return (
     <ImageBackground source={mapBgSource} style={styles.container}>
+      {/* Battle log */}
+      <View style={styles.battleLogContainer}>
+        <Text style={styles.battleLogTitle}>Battle Log</Text>
+        <ScrollView
+          ref={battleLogRef}
+          style={styles.battleLog}
+          showsVerticalScrollIndicator={false}
+        >
+          {battleState.battleLog.map((message, index) => (
+            <Text key={index} style={styles.battleLogMessage}>
+              {message}
+            </Text>
+          ))}
+        </ScrollView>
+      </View>
+
+      {/* Action controls */}
+      <View style={styles.controlsContainer}>{renderActionButtons()}</View>
+
       <View style={styles.overlay}>
         {/* Battle field */}
         <View style={styles.battleField}>
@@ -402,25 +421,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
               .map((char, index) => renderCharacter(char, index))}
           </View>
         </View>
-
-        {/* Battle log */}
-        <View style={styles.battleLogContainer}>
-          <Text style={styles.battleLogTitle}>Battle Log</Text>
-          <ScrollView
-            ref={battleLogRef}
-            style={styles.battleLog}
-            showsVerticalScrollIndicator={false}
-          >
-            {battleState.battleLog.map((message, index) => (
-              <Text key={index} style={styles.battleLogMessage}>
-                {message}
-              </Text>
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* Action controls */}
-        <View style={styles.controlsContainer}>{renderActionButtons()}</View>
 
         {/* Target selection overlay */}
         {renderTargetSelection()}
