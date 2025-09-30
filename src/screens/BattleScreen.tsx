@@ -252,10 +252,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     // Monster image logic
     let imageSource = null;
     if (!isPlayer) {
-      // Enemy: get monster image
       let monsterImageKey = null;
       if (Array.isArray(character.image)) {
-        // Pick random image from array
         const arr = character.image;
         monsterImageKey = arr[Math.floor(Math.random() * arr.length)];
       } else {
@@ -272,48 +270,37 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     return (
       <View
         key={`${character.id}-${index}`}
-        style={[
-          styles.characterContainer,
-          !isAlive && styles.defeatedCharacter,
-        ]}
+        style={[styles.battlerSlot, !isAlive && styles.defeatedCharacter]}
       >
-        <View style={styles.characterInfo}>
-          {imageSource && (
-            <Image
-              source={imageSource}
-              style={styles.characterImage}
-              resizeMode="contain"
+        {imageSource && (
+          <Image
+            source={imageSource}
+            style={styles.battlerImage}
+            resizeMode="contain"
+          />
+        )}
+        <View style={styles.battlerStatsOverlay}>
+          <Text style={styles.battlerName}>{character.name}</Text>
+          <View style={styles.battlerHpBarBg}>
+            <View
+              style={[
+                styles.battlerHpBarFill,
+                {
+                  width: `${hpPercentage}%`,
+                  backgroundColor:
+                    hpPercentage > 50
+                      ? "#32CD32"
+                      : hpPercentage > 25
+                      ? "#FFD700"
+                      : "#DC143C",
+                },
+              ]}
             />
-          )}
-          <Text style={[styles.characterName, isPlayer && styles.playerName]}>
-            {character.name}
-          </Text>
-          <Text style={styles.characterLevel}>Lv. {character.level}</Text>
-        </View>
-
-        <View style={styles.characterStats}>
-          <View style={styles.hpContainer}>
-            <Text style={styles.hpText}>
-              HP: {character.currentHp}/{character.stats.hp}
-            </Text>
-            <View style={styles.hpBarBg}>
-              <View
-                style={[
-                  styles.hpBarFill,
-                  {
-                    width: `${hpPercentage}%`,
-                    backgroundColor:
-                      hpPercentage > 50
-                        ? "#32CD32"
-                        : hpPercentage > 25
-                        ? "#FFD700"
-                        : "#DC143C",
-                  },
-                ]}
-              />
-            </View>
           </View>
 
+          <Text style={styles.battlerHpText}>
+            {character.currentHp}/{character.stats.hp} HP
+          </Text>
           {renderActionMeter(character)}
           {renderMoveCooldowns(character)}
         </View>
@@ -487,15 +474,24 @@ const styles = StyleSheet.create({
   battleField: {
     flex: 1,
     flexDirection: "row",
-    padding: 20,
+    justifyContent: "center",
+    alignItems: "flex-end",
+    gap: 40,
+    paddingBottom: 40,
   },
   playerParty: {
     flex: 1,
-    marginRight: 10,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "flex-end",
+    gap: 40,
   },
   enemyParty: {
     flex: 1,
-    marginLeft: 10,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "flex-end",
+    gap: 40,
   },
   partyLabel: {
     fontSize: 18,
@@ -507,13 +503,62 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
-  characterContainer: {
-    backgroundColor: "rgba(26, 26, 46, 0.9)",
+  characterContainer: {},
+  battlerSlot: {
+    alignItems: "center",
+    justifyContent: "flex-end",
+    minWidth: 100,
+    minHeight: 120,
+    marginHorizontal: 10,
+    position: "relative",
+  },
+  battlerImage: {
+    width: 96,
+    height: 96,
+    marginBottom: 0,
+    zIndex: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  battlerStatsOverlay: {
+    position: "absolute",
+    bottom: -32,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    backgroundColor: "rgba(26,26,46,0.85)",
     borderRadius: 8,
-    padding: 12,
-    marginVertical: 5,
-    borderWidth: 1,
-    borderColor: "#FFD700",
+    paddingVertical: 4,
+    paddingHorizontal: 6,
+    zIndex: 3,
+    minWidth: 80,
+  },
+  battlerName: {
+    fontSize: 13,
+    fontWeight: "bold",
+    color: "#FFD700",
+    marginBottom: 2,
+    textAlign: "center",
+  },
+  battlerHpBarBg: {
+    width: "80%",
+    height: 7,
+    backgroundColor: "#333",
+    borderRadius: 4,
+    overflow: "hidden",
+    marginBottom: 2,
+  },
+  battlerHpBarFill: {
+    height: "100%",
+    borderRadius: 4,
+  },
+  battlerHpText: {
+    fontSize: 11,
+    color: "#C0C0C0",
+    textAlign: "center",
   },
   defeatedCharacter: {
     opacity: 0.5,
