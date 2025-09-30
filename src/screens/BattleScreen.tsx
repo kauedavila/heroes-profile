@@ -423,7 +423,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
         <View style={styles.battleField}>
           {/* Player party */}
           <View style={styles.playerParty}>
-            <Text style={styles.partyLabel}>Your Party</Text>
             {battleState.characters
               .filter((char) => char.isPlayerControlled)
               .map((char, index) => renderCharacter(char, index))}
@@ -431,7 +430,6 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
 
           {/* Enemy party */}
           <View style={styles.enemyParty}>
-            <Text style={styles.partyLabel}>Enemies</Text>
             {battleState.characters
               .filter((char) => !char.isPlayerControlled)
               .map((char, index) => renderCharacter(char, index))}
@@ -513,8 +511,8 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   battlerImage: {
-    width: 140,
-    height: 140,
+    width: 240,
+    height: 240,
     marginBottom: 18,
     zIndex: 2,
     shadowColor: "#000",
