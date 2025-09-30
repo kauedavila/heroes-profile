@@ -27,12 +27,12 @@ export const WORLD_MAP: WorldMap = {
   description: "A vast world filled with dangers and opportunities",
   regions: [
     {
-      id: "starting_plains",
-      name: "Starting Plains",
-      description: "Peaceful grasslands perfect for new adventurers",
-      position: { x: 100, y: 200 },
+      id: "ice_dungeon",
+      name: "Ice Dungeon",
+      description: "A cold and treacherous dungeon filled with ice monsters",
+      position: { x: 900, y: 500 },
       unlocked: true,
-      maps: ["plains_monsters_01", "village_recruitment_01"],
+      maps: ["ice_dungeon_01", "ice_dungeon_02", "ice_dungeon_03"],
     },
     {
       id: "dark_forest",

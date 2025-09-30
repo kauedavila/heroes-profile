@@ -14,7 +14,7 @@ export interface DropItem {
 export interface Monster {
   id: string;
   name: string;
-  image: string;
+  image: string | string[];
   level: number;
   stats: Stats;
   abilities: string[];
@@ -69,7 +69,7 @@ export interface RecruitmentCharacter {
 export interface GameMap {
   id: string;
   name: string;
-  type: 'monster' | 'recruitment';
+  type: "monster" | "recruitment";
   description: string;
   backgroundImage: string;
   difficulty?: number;
@@ -121,7 +121,7 @@ export interface GameState {
 }
 
 export interface BattleAction {
-  type: 'attack' | 'ability' | 'item' | 'guard';
+  type: "attack" | "ability" | "item" | "guard";
   source: BattleCharacter;
   target?: BattleCharacter;
   abilityId?: string;
