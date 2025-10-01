@@ -36,7 +36,7 @@ export default function App() {
       const savedState = await storageService.loadGameState();
       if (savedState) {
         setGameState(savedState);
-        // Restore the current screen, defaulting to worldMap if in battle
+        // Restore the current screen, defaulting to lobby if in battle
         if (savedState.currentScreen && savedState.currentScreen !== "battle") {
           setCurrentScreen(savedState.currentScreen);
         } else if (
@@ -44,7 +44,7 @@ export default function App() {
           savedState.currentBattle
         ) {
           // Restore battle state if available
-          setCurrentScreen("worldMap"); // For now, go to world map instead of battle
+          setCurrentScreen("lobby"); // Changed from "worldMap" to "lobby"
         }
       }
     } catch (error) {
@@ -342,14 +342,25 @@ export default function App() {
 
     const updatedGameState = { ...gameState };
     updatedGameState.player.gold -= totalCost;
-    updatedGameState.party.push(newCharacter);
+    
+    const MAX_PARTY_SIZE = 4;
+    if (updatedGameState.party.length < MAX_PARTY_SIZE) {
+      updatedGameState.party.push(newCharacter);
+    } else {
+      // Party is full, add to reserve
+      if (!updatedGameState.reserve) {
+        updatedGameState.reserve = [];
+      }
+      updatedGameState.reserve.push(newCharacter);
+    }
 
     setGameState(updatedGameState);
     await storageService.saveGameState(updatedGameState);
 
+    const destination = updatedGameState.party.length < MAX_PARTY_SIZE ? "party" : "reserve";
     Alert.alert(
       "Recruitment Successful!",
-      `${newCharacter.name} has joined your party with ${potential} potential!`,
+      `${newCharacter.name} has joined your ${destination} with ${potential} potential!`,
       [{ text: "Continue", onPress: () => setCurrentScreen("lobby") }] // Changed from "worldMap" to "lobby"
     );
   };
