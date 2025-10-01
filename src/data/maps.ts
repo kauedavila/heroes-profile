@@ -13,8 +13,10 @@
  * - rounds: Número de rodadas (apenas mapas de combate)
  * - monsters: Lista de inimigos por rodada (apenas mapas de combate)
  * - rewards: Recompensas ao completar o mapa (ouro, experiência, itens)
- * - recruitmentCost: Custo para recrutar (apenas mapas de recrutamento)
- * - availableCharacters: Lista de personagens disponíveis para recrutamento
+ * - recruitmentCost: Custo base para recrutar (apenas mapas de recrutamento)
+ * - availableCharacters: Lista de personagens disponíveis para recrutamento (apenas mapas de recrutamento)
+ *   - id: ID do monstro no banco de dados (monsters.ts)
+ *   - cost: Custo adicional para recrutar este personagem específico
  *
  * Para adicionar novos mapas, basta incluir um novo objeto ao array MAPS.
  * Este arquivo é utilizado pelo sistema de dados do jogo para gerar cenários, batalhas e opções de recrutamento.
