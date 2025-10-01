@@ -296,10 +296,13 @@ export default function App() {
           
           return {
             text: `${monster.name} (Lv.${monster.level}) - ${recruitChar.cost} gold`,
-            onPress: () => recruitCharacter(monster, recruitChar.cost, map.recruitmentCost || 0),
+            onPress: () => {
+              // Wrap async call in void to satisfy Alert.alert type requirements
+              void recruitCharacter(monster, recruitChar.cost, map.recruitmentCost || 0);
+            },
           };
         })
-        .filter((option): option is { text: string; onPress: () => Promise<void> } => option !== null);
+        .filter((option): option is { text: string; onPress: () => void } => option !== null);
 
       if (characterOptions.length === 0) {
         Alert.alert("Error", "No characters available for recruitment.");
