@@ -40,6 +40,7 @@ export class BattleSystem {
         actionMeter: 0,
         isPlayerControlled: true,
         moveCooldowns: {},
+        position: char.position || "front", // Use character's position or default to front
         // image: char.image || null, // Uncomment if you add images for player characters
       });
     });
@@ -69,6 +70,7 @@ export class BattleSystem {
         image: selectedImage,
         imageWidth: enemy.imageWidth,
         imageHeight: enemy.imageHeight,
+        position: enemy.position || "front", // Use monster's position or default to front
       });
     });
 
@@ -157,12 +159,31 @@ export class BattleSystem {
         this.getMoveById(moveId) && (character.moveCooldowns[moveId] || 0) <= 0
     );
 
+    // Select target based on positioning
+    // Front row characters have higher priority (70% chance to be targeted)
+    let target: BattleCharacter;
+    const frontRowTargets = playerCharacters.filter(
+      (char) => char.position === "front"
+    );
+    const backRowTargets = playerCharacters.filter(
+      (char) => char.position === "back"
+    );
+
+    if (frontRowTargets.length > 0 && (backRowTargets.length === 0 || Math.random() < 0.7)) {
+      // Target front row (70% chance if both rows exist)
+      target = frontRowTargets[Math.floor(Math.random() * frontRowTargets.length)];
+    } else if (backRowTargets.length > 0) {
+      // Target back row
+      target = backRowTargets[Math.floor(Math.random() * backRowTargets.length)];
+    } else {
+      // Fallback to any available target
+      target = playerCharacters[Math.floor(Math.random() * playerCharacters.length)];
+    }
+
     if (availableMoves.length > 0 && Math.random() > 0.3) {
       // 70% chance to use a move instead of basic attack
       const moveId =
         availableMoves[Math.floor(Math.random() * availableMoves.length)];
-      const target =
-        playerCharacters[Math.floor(Math.random() * playerCharacters.length)];
       action = {
         type: "move",
         source: character,
@@ -171,8 +192,6 @@ export class BattleSystem {
       };
     } else {
       // Basic attack
-      const target =
-        playerCharacters[Math.floor(Math.random() * playerCharacters.length)];
       action = {
         type: "attack",
         source: character,
@@ -280,11 +299,16 @@ export class BattleSystem {
     }
 
     // Calculate damage/healing based on move formula
-    const damageAmount = Math.floor(
+    let damageAmount = Math.floor(
       move.damageRatio.attack * caster.stats.attack +
         move.damageRatio.magic * caster.stats.magic +
         move.damageRatio.level * caster.level
     );
+
+    // Apply position modifier for attacker (back row deals half damage)
+    if (caster.position === "back") {
+      damageAmount = Math.floor(damageAmount * 0.5);
+    }
 
     // Apply cooldown
     const actualCooldown = Math.max(0, move.baseCooldown);
@@ -297,10 +321,16 @@ export class BattleSystem {
       case "physical":
       case "magical":
         if (target && damageAmount > 0) {
-          const actualDamage = Math.max(
+          let actualDamage = Math.max(
             1,
             damageAmount - target.stats.defense / 2
           );
+          
+          // Apply position modifier for defender (back row receives half damage)
+          if (target.position === "back") {
+            actualDamage = Math.floor(actualDamage * 0.5);
+          }
+          
           target.currentHp = Math.max(0, target.currentHp - actualDamage);
           this.battleState.battleLog.push(
             `${caster.name} uses ${move.name} on ${target.name} for ${actualDamage} damage!`
@@ -344,10 +374,20 @@ export class BattleSystem {
     const defense = target.stats.defense;
 
     // Calculate damage with some randomness
-    const damage = Math.max(
+    let damage = Math.max(
       1,
       Math.floor((baseDamage - defense / 2) * (0.8 + Math.random() * 0.4))
     );
+
+    // Apply position modifier for attacker (back row deals half damage)
+    if (attacker.position === "back") {
+      damage = Math.floor(damage * 0.5);
+    }
+
+    // Apply position modifier for defender (back row receives half damage)
+    if (target.position === "back") {
+      damage = Math.floor(damage * 0.5);
+    }
 
     target.currentHp = Math.max(0, target.currentHp - damage);
 

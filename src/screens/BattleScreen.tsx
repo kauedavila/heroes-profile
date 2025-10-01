@@ -248,6 +248,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     const isPlayer = character.isPlayerControlled;
     const isAlive = character.currentHp > 0;
     const hpPercentage = (character.currentHp / character.stats.hp) * 100;
+    const isBackRow = character.position === "back";
 
     // Monster image logic
     let imageSource = null;
@@ -280,6 +281,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           styles.battlerSlot,
           !isAlive && styles.defeatedCharacter,
           !isPlayer && styles.enemySlot,
+          isBackRow && styles.backRowCharacter, // Add back row styling
         ]}
       >
         {imageSource && (
@@ -310,6 +312,20 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
 
           {/* Action Meter */}
           {renderActionMeter(character)}
+
+          {/* Position Indicator */}
+          {isPlayer && (
+            <View
+              style={[
+                styles.positionIndicator,
+                isBackRow && styles.backRowIndicator,
+              ]}
+            >
+              <Text style={styles.positionText}>
+                {isBackRow ? "BACK" : "FRONT"}
+              </Text>
+            </View>
+          )}
 
           {/* Potential Display */}
           {character.potential !== undefined && character.potential > 0 && (
@@ -792,6 +808,26 @@ const styles = StyleSheet.create({
     color: "#FFD700",
     fontWeight: "bold",
     marginTop: 2,
+  },
+  backRowCharacter: {
+    opacity: 0.85, // Slightly transparent to show they're in back
+    transform: [{ scale: 0.9 }], // Slightly smaller
+  },
+  positionIndicator: {
+    backgroundColor: "rgba(50, 205, 50, 0.9)",
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+    borderRadius: 3,
+    marginTop: 2,
+    alignSelf: "center",
+  },
+  backRowIndicator: {
+    backgroundColor: "rgba(65, 105, 225, 0.9)",
+  },
+  positionText: {
+    fontSize: 8,
+    fontWeight: "bold",
+    color: "white",
   },
   // Animation styles
   "attack-shake": {
