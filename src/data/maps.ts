@@ -13,8 +13,10 @@
  * - rounds: Número de rodadas (apenas mapas de combate)
  * - monsters: Lista de inimigos por rodada (apenas mapas de combate)
  * - rewards: Recompensas ao completar o mapa (ouro, experiência, itens)
- * - recruitmentCost: Custo para recrutar (apenas mapas de recrutamento)
- * - availableCharacters: Lista de personagens disponíveis para recrutamento
+ * - recruitmentCost: Custo base para recrutar (apenas mapas de recrutamento)
+ * - availableCharacters: Lista de personagens disponíveis para recrutamento (apenas mapas de recrutamento)
+ *   - id: ID do monstro no banco de dados (monsters.ts)
+ *   - cost: Custo adicional para recrutar este personagem específico
  *
  * Para adicionar novos mapas, basta incluir um novo objeto ao array MAPS.
  * Este arquivo é utilizado pelo sistema de dados do jogo para gerar cenários, batalhas e opções de recrutamento.
@@ -41,22 +43,8 @@ export const MAPS: GameMap[] = [
     recruitmentCost: 100,
     availableCharacters: [
       {
-        class: "warrior",
-        level: 1,
+        id: "slime_icei", // References monster from monster database
         cost: 150,
-        stats: { hp: 80, attack: 15, defense: 12, speed: 8, magic: 2 },
-      },
-      {
-        class: "archer",
-        level: 1,
-        cost: 120,
-        stats: { hp: 60, attack: 12, defense: 8, speed: 15, magic: 5 },
-      },
-      {
-        class: "mage",
-        level: 1,
-        cost: 180,
-        stats: { hp: 45, attack: 8, defense: 6, speed: 10, magic: 20 },
       },
     ],
   },

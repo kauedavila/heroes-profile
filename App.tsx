@@ -126,7 +126,7 @@ export default function App() {
         await startBattle(selectedMap);
       } else if (selectedMap.type === "recruitment") {
         // Show recruitment screen
-        handleRecruitment(selectedMap);
+        await handleRecruitment(selectedMap);
       }
     } catch (error) {
       Alert.alert("Error", "Failed to load map.");
@@ -278,25 +278,48 @@ export default function App() {
     }
   };
 
-  const handleRecruitment = (map: GameMap) => {
-    if (!map.availableCharacters || !gameState) return;
+  const handleRecruitment = async (map: GameMap) => {
+    if (!map.availableCharacters || !gameState || !gameDataService) return;
 
-    const characterOptions = map.availableCharacters.map((char, index) => ({
-      text: `${char.class} (Lv.${char.level}) - ${char.cost} gold`,
-      onPress: () => recruitCharacter(char, map.recruitmentCost || 0),
-    }));
+    try {
+      // Load monsters from the database
+      const monsters = await gameDataService.loadMonsters();
+      
+      // Map availableCharacters to actual monster data
+      const characterOptions = map.availableCharacters
+        .map((recruitChar) => {
+          const monster = monsters.find((m) => m.id === recruitChar.id);
+          if (!monster) {
+            console.error(`Monster with id ${recruitChar.id} not found`);
+            return null;
+          }
+          
+          return {
+            text: `${monster.name} (Lv.${monster.level}) - ${recruitChar.cost} gold`,
+            onPress: () => recruitCharacter(monster, recruitChar.cost, map.recruitmentCost || 0),
+          };
+        })
+        .filter((option): option is { text: string; onPress: () => Promise<void> } => option !== null);
 
-    Alert.alert(
-      "Recruitment",
-      `Welcome to ${map.name}! Choose a character to recruit:`,
-      [...characterOptions, { text: "Cancel", style: "cancel" }]
-    );
+      if (characterOptions.length === 0) {
+        Alert.alert("Error", "No characters available for recruitment.");
+        return;
+      }
+
+      Alert.alert(
+        "Recruitment",
+        `Welcome to ${map.name}! Choose a character to recruit:`,
+        [...characterOptions, { text: "Cancel", style: "cancel" as const }]
+      );
+    } catch (error) {
+      Alert.alert("Error", "Failed to load recruitment options.");
+    }
   };
 
-  const recruitCharacter = async (recruitmentChar: any, baseCost: number) => {
+  const recruitCharacter = async (monster: Monster, characterCost: number, baseCost: number) => {
     if (!gameState) return;
 
-    const totalCost = recruitmentChar.cost + baseCost;
+    const totalCost = characterCost + baseCost;
 
     if (gameState.player.gold < totalCost) {
       Alert.alert(
@@ -313,11 +336,11 @@ export default function App() {
     };
 
     const randomizedStats = {
-      hp: randomizeStat(recruitmentChar.stats.hp),
-      attack: randomizeStat(recruitmentChar.stats.attack),
-      defense: randomizeStat(recruitmentChar.stats.defense),
-      speed: randomizeStat(recruitmentChar.stats.speed),
-      magic: randomizeStat(recruitmentChar.stats.magic),
+      hp: randomizeStat(monster.stats.hp),
+      attack: randomizeStat(monster.stats.attack),
+      defense: randomizeStat(monster.stats.defense),
+      speed: randomizeStat(monster.stats.speed),
+      magic: randomizeStat(monster.stats.magic),
     };
 
     // Generate random potential between 10 and 20
@@ -325,19 +348,16 @@ export default function App() {
 
     const newCharacter = {
       id: `recruited_${Date.now()}`,
-      name: `${
-        recruitmentChar.class.charAt(0).toUpperCase() +
-        recruitmentChar.class.slice(1)
-      }`,
-      class: recruitmentChar.class,
-      level: recruitmentChar.level,
+      name: monster.name,
+      class: monster.name, // Use monster name as class
+      level: monster.level,
       stats: randomizedStats,
-      baseStats: { ...recruitmentChar.stats }, // Store original base stats
+      baseStats: { ...monster.stats }, // Store original base stats
       experience: 0,
-      moves: ["basic_attack", "guard"], // Basic moves
+      moves: monster.moves.length > 0 ? monster.moves : ["basic_attack", "guard"], // Use monster moves or basic moves
       equipment: {},
       potential: potential,
-      position: "front", // Default position
+      position: "front" as const, // Default position
     };
 
     const updatedGameState = { ...gameState };
