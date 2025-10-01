@@ -39,7 +39,7 @@ export const MAPS: GameMap[] = [
     name: "Peaceful Village",
     type: "recruitment",
     description: "A small village where heroes can be recruited",
-    backgroundImage: "village_bg.png",
+    backgroundImage: "ice_dungeon_01.png",
     recruitmentCost: 100,
     availableCharacters: [
       {
