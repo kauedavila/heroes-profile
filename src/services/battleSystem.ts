@@ -99,6 +99,19 @@ export class BattleSystem {
   }
 
   private updateActionMeters(): void {
+    // Check if battle has ended before updating meters
+    const alivePlayerCharacters = this.battleState.characters.filter(
+      (char) => char.isPlayerControlled && char.currentHp > 0
+    );
+    const aliveEnemyCharacters = this.battleState.characters.filter(
+      (char) => !char.isPlayerControlled && char.currentHp > 0
+    );
+
+    if (alivePlayerCharacters.length === 0 || aliveEnemyCharacters.length === 0) {
+      // Battle has ended, stop processing
+      return;
+    }
+
     let shouldUpdate = false;
 
     this.battleState.characters.forEach((character) => {
@@ -145,10 +158,19 @@ export class BattleSystem {
     const playerCharacters = this.battleState.characters.filter(
       (char) => char.isPlayerControlled && char.currentHp > 0
     );
+    const enemyCharacters = this.battleState.characters.filter(
+      (char) => !char.isPlayerControlled && char.currentHp > 0
+    );
 
     if (playerCharacters.length === 0) {
       // Player party defeated
       this.endBattle(false);
+      return;
+    }
+
+    if (enemyCharacters.length === 0) {
+      // Enemy party defeated
+      this.endBattle(true);
       return;
     }
 
