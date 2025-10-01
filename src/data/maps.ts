@@ -43,7 +43,7 @@ export const MAPS: GameMap[] = [
     recruitmentCost: 100,
     availableCharacters: [
       {
-        id: "slime_icei", // References monster from monster database
+        id: "slime_icei",
         cost: 150,
       },
     ],
