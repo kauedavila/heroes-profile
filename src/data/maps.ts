@@ -41,22 +41,8 @@ export const MAPS: GameMap[] = [
     recruitmentCost: 100,
     availableCharacters: [
       {
-        class: "warrior",
-        level: 1,
+        id: "slime_icei", // References monster from monster database
         cost: 150,
-        stats: { hp: 80, attack: 15, defense: 12, speed: 8, magic: 2 },
-      },
-      {
-        class: "archer",
-        level: 1,
-        cost: 120,
-        stats: { hp: 60, attack: 12, defense: 8, speed: 15, magic: 5 },
-      },
-      {
-        class: "mage",
-        level: 1,
-        cost: 180,
-        stats: { hp: 45, attack: 8, defense: 6, speed: 10, magic: 20 },
       },
     ],
   },

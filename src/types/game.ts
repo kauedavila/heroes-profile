@@ -93,10 +93,8 @@ export interface MapReward {
 }
 
 export interface RecruitmentCharacter {
-  class: string;
-  level: number;
+  id: string; // Monster ID from monster database
   cost: number;
-  stats: Stats;
 }
 
 export interface GameMap {
