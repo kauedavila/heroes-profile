@@ -247,9 +247,12 @@ export default function App() {
         [
           {
             text: "Continue",
-            onPress: async () => {
-              await saveGameStateWithContext("lobby");
-              setCurrentScreen("lobby"); // Changed from "worldMap" to "lobby"
+            onPress: () => {
+              // Wrap async call in void to satisfy Alert.alert type requirements
+              void (async () => {
+                await saveGameStateWithContext("lobby");
+                setCurrentScreen("lobby"); // Changed from "worldMap" to "lobby"
+              })();
             },
           },
         ]
@@ -261,16 +264,19 @@ export default function App() {
         [
           {
             text: "Continue",
-            onPress: async () => {
-              // Lose some gold as penalty
-              const updatedGameState = { ...gameState };
-              updatedGameState.player.gold = Math.max(
-                0,
-                Math.floor(gameState.player.gold * 0.8)
-              );
-              setGameState(updatedGameState);
-              await saveGameStateWithContext("lobby");
-              setCurrentScreen("lobby"); // Changed from "worldMap" to "lobby"
+            onPress: () => {
+              // Wrap async call in void to satisfy Alert.alert type requirements
+              void (async () => {
+                // Lose some gold as penalty
+                const updatedGameState = { ...gameState };
+                updatedGameState.player.gold = Math.max(
+                  0,
+                  Math.floor(gameState.player.gold * 0.8)
+                );
+                setGameState(updatedGameState);
+                await saveGameStateWithContext("lobby");
+                setCurrentScreen("lobby"); // Changed from "worldMap" to "lobby"
+              })();
             },
           },
         ]
@@ -296,10 +302,13 @@ export default function App() {
           
           return {
             text: `${monster.name} (Lv.${monster.level}) - ${recruitChar.cost} gold`,
-            onPress: () => recruitCharacter(monster, recruitChar.cost, map.recruitmentCost || 0),
+            onPress: () => {
+              // Wrap async call in void to satisfy Alert.alert type requirements
+              void recruitCharacter(monster, recruitChar.cost, map.recruitmentCost || 0);
+            },
           };
         })
-        .filter((option): option is { text: string; onPress: () => Promise<void> } => option !== null);
+        .filter((option): option is { text: string; onPress: () => void } => option !== null);
 
       if (characterOptions.length === 0) {
         Alert.alert("Error", "No characters available for recruitment.");
