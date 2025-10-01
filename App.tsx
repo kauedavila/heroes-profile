@@ -286,18 +286,20 @@ export default function App() {
       const monsters = await gameDataService.loadMonsters();
       
       // Map availableCharacters to actual monster data
-      const characterOptions = map.availableCharacters.map((recruitChar) => {
-        const monster = monsters.find((m) => m.id === recruitChar.id);
-        if (!monster) {
-          console.error(`Monster with id ${recruitChar.id} not found`);
-          return null;
-        }
-        
-        return {
-          text: `${monster.name} (Lv.${monster.level}) - ${recruitChar.cost} gold`,
-          onPress: () => recruitCharacter(monster, recruitChar.cost, map.recruitmentCost || 0),
-        };
-      }).filter(Boolean); // Remove null entries
+      const characterOptions = map.availableCharacters
+        .map((recruitChar) => {
+          const monster = monsters.find((m) => m.id === recruitChar.id);
+          if (!monster) {
+            console.error(`Monster with id ${recruitChar.id} not found`);
+            return null;
+          }
+          
+          return {
+            text: `${monster.name} (Lv.${monster.level}) - ${recruitChar.cost} gold`,
+            onPress: () => recruitCharacter(monster, recruitChar.cost, map.recruitmentCost || 0),
+          };
+        })
+        .filter((option): option is { text: string; onPress: () => Promise<void> } => option !== null);
 
       if (characterOptions.length === 0) {
         Alert.alert("Error", "No characters available for recruitment.");
@@ -307,7 +309,7 @@ export default function App() {
       Alert.alert(
         "Recruitment",
         `Welcome to ${map.name}! Choose a character to recruit:`,
-        [...characterOptions, { text: "Cancel", style: "cancel" }]
+        [...characterOptions, { text: "Cancel", style: "cancel" as const }]
       );
     } catch (error) {
       Alert.alert("Error", "Failed to load recruitment options.");
@@ -355,7 +357,7 @@ export default function App() {
       moves: monster.moves.length > 0 ? monster.moves : ["basic_attack", "guard"], // Use monster moves or basic moves
       equipment: {},
       potential: potential,
-      position: "front", // Default position
+      position: "front" as const, // Default position
     };
 
     const updatedGameState = { ...gameState };
