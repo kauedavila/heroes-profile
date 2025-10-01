@@ -4,11 +4,12 @@ import { Alert } from "react-native";
 import { MainMenuScreen } from "./src/screens/MainMenuScreen";
 import { WorldMapScreen } from "./src/screens/WorldMapScreen";
 import { BattleScreen } from "./src/screens/BattleScreen";
+import { LobbyScreen } from "./src/screens/LobbyScreen";
 import { GameState, GameMap, Monster } from "./src/types/game";
 import { storageService } from "./src/services/storageService";
 import { GameDataService } from "./src/services/gameDataService";
 
-type GameScreen = "menu" | "worldMap" | "battle" | "recruitment";
+type GameScreen = "menu" | "worldMap" | "battle" | "recruitment" | "lobby";
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<GameScreen>("menu");
@@ -58,7 +59,7 @@ export default function App() {
     try {
       const newGameState = await storageService.createNewGame();
       setGameState(newGameState);
-      setCurrentScreen("worldMap");
+      setCurrentScreen("lobby"); // Changed from "worldMap" to "lobby"
     } catch (error) {
       Alert.alert("Error", "Failed to create new game.");
     }
@@ -66,7 +67,7 @@ export default function App() {
 
   const handleLoadGame = (loadedGameState: GameState) => {
     setGameState(loadedGameState);
-    setCurrentScreen("worldMap");
+    setCurrentScreen("lobby"); // Changed from "worldMap" to "lobby"
   };
 
   const handleOptions = () => {
@@ -109,6 +110,16 @@ export default function App() {
       }
 
       setCurrentMap(selectedMap);
+
+      // Save the map background for lobby
+      if (gameState) {
+        const updatedGameState = {
+          ...gameState,
+          lastMapBackground: selectedMap.backgroundImage,
+        };
+        setGameState(updatedGameState);
+        await storageService.saveGameState(updatedGameState);
+      }
 
       if (selectedMap.type === "monster") {
         // Start battle
@@ -237,8 +248,8 @@ export default function App() {
           {
             text: "Continue",
             onPress: async () => {
-              await saveGameStateWithContext("worldMap");
-              setCurrentScreen("worldMap");
+              await saveGameStateWithContext("lobby");
+              setCurrentScreen("lobby"); // Changed from "worldMap" to "lobby"
             },
           },
         ]
@@ -258,8 +269,8 @@ export default function App() {
                 Math.floor(gameState.player.gold * 0.8)
               );
               setGameState(updatedGameState);
-              await saveGameStateWithContext("worldMap");
-              setCurrentScreen("worldMap");
+              await saveGameStateWithContext("lobby");
+              setCurrentScreen("lobby"); // Changed from "worldMap" to "lobby"
             },
           },
         ]
@@ -326,6 +337,7 @@ export default function App() {
       moves: ["basic_attack", "guard"], // Basic moves
       equipment: {},
       potential: potential,
+      position: "front", // Default position
     };
 
     const updatedGameState = { ...gameState };
@@ -338,12 +350,25 @@ export default function App() {
     Alert.alert(
       "Recruitment Successful!",
       `${newCharacter.name} has joined your party with ${potential} potential!`,
-      [{ text: "Continue", onPress: () => setCurrentScreen("worldMap") }]
+      [{ text: "Continue", onPress: () => setCurrentScreen("lobby") }] // Changed from "worldMap" to "lobby"
     );
   };
 
   const handleBackToMenu = () => {
     setCurrentScreen("menu");
+  };
+
+  const handleUpdateGameState = async (updatedGameState: GameState) => {
+    setGameState(updatedGameState);
+    await storageService.saveGameState(updatedGameState);
+  };
+
+  const handleWorldMapFromLobby = () => {
+    setCurrentScreen("worldMap");
+  };
+
+  const handleBackToLobby = () => {
+    setCurrentScreen("lobby");
   };
 
   if (isLoading) {
@@ -363,6 +388,23 @@ export default function App() {
         </>
       );
 
+    case "lobby":
+      if (!gameState) {
+        setCurrentScreen("menu");
+        return null;
+      }
+      return (
+        <>
+          <LobbyScreen
+            gameState={gameState}
+            onWorldMap={handleWorldMapFromLobby}
+            onBackToMenu={handleBackToMenu}
+            onUpdateGameState={handleUpdateGameState}
+          />
+          <StatusBar style="light" />
+        </>
+      );
+
     case "worldMap":
       if (!gameState) {
         setCurrentScreen("menu");
@@ -373,7 +415,7 @@ export default function App() {
           <WorldMapScreen
             gameState={gameState}
             onMapSelect={handleMapSelect}
-            onBack={handleBackToMenu}
+            onBack={handleBackToLobby}
           />
           <StatusBar style="light" />
         </>
@@ -381,7 +423,7 @@ export default function App() {
 
     case "battle":
       if (!gameState || battleEnemies.length === 0 || !gameDataService) {
-        setCurrentScreen("worldMap");
+        setCurrentScreen("lobby"); // Changed from "worldMap" to "lobby"
         return null;
       }
       return (

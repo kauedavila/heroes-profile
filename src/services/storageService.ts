@@ -48,7 +48,23 @@ class StorageService {
     try {
       const savedState = await AsyncStorage.getItem(GAME_STATE_KEY);
       if (savedState) {
-        return JSON.parse(savedState) as GameState;
+        const gameState = JSON.parse(savedState) as GameState;
+        // Migrate old saves: add reserve array if missing
+        if (!gameState.reserve) {
+          gameState.reserve = [];
+        }
+        // Migrate old saves: add position to characters if missing
+        gameState.party = gameState.party.map(char => ({
+          ...char,
+          position: char.position || "front"
+        }));
+        if (gameState.reserve) {
+          gameState.reserve = gameState.reserve.map(char => ({
+            ...char,
+            position: char.position || "front"
+          }));
+        }
+        return gameState;
       }
       return null;
     } catch (error) {
@@ -63,9 +79,25 @@ class StorageService {
       const slot = saveSlots.find(save => save.id === slotId);
       
       if (slot) {
+        const gameState = slot.gameState;
+        // Migrate old saves: add reserve array if missing
+        if (!gameState.reserve) {
+          gameState.reserve = [];
+        }
+        // Migrate old saves: add position to characters if missing
+        gameState.party = gameState.party.map(char => ({
+          ...char,
+          position: char.position || "front"
+        }));
+        if (gameState.reserve) {
+          gameState.reserve = gameState.reserve.map(char => ({
+            ...char,
+            position: char.position || "front"
+          }));
+        }
         // Set as current game state
-        await AsyncStorage.setItem(GAME_STATE_KEY, JSON.stringify(slot.gameState));
-        return slot.gameState;
+        await AsyncStorage.setItem(GAME_STATE_KEY, JSON.stringify(gameState));
+        return gameState;
       }
       return null;
     } catch (error) {
@@ -113,7 +145,8 @@ class StorageService {
       },
       experience: 0,
       moves: ['slash', 'guard'],
-      equipment: {}
+      equipment: {},
+      position: 'front'
     };
 
     const newGameState: GameState = {
@@ -124,6 +157,7 @@ class StorageService {
         gold: 500
       },
       party: [defaultCharacter],
+      reserve: [],
       completedMaps: [],
       unlockedRegions: ['starting_plains'],
       inventory: {

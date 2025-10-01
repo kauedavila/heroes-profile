@@ -46,6 +46,7 @@ export interface Monster {
     experience: number;
   };
   dropItems: DropItem[];
+  position?: "front" | "back"; // Battle position (default: front)
 }
 
 export interface Character {
@@ -63,6 +64,7 @@ export interface Character {
   };
   potential?: number; // Potential for gaining experience (10-20)
   baseStats?: Stats; // Original base stats before randomization
+  position?: "front" | "back"; // Battle position (default: front)
 }
 
 export interface BattleCharacter extends Character {
@@ -74,6 +76,7 @@ export interface BattleCharacter extends Character {
   imageWidth?: number;
   imageHeight?: number;
   currentAnimation?: string; // Current attack animation playing
+  position: "front" | "back"; // Battle position (default: front)
 }
 
 export interface MapMonster {
@@ -143,11 +146,13 @@ export interface GameState {
     gold: number;
   };
   party: Character[];
+  reserve: Character[]; // Characters not in active party
   completedMaps: string[];
   unlockedRegions: string[];
   currentMap?: string;
+  lastMapBackground?: string; // Background image of last visited map
   inventory: { [itemId: string]: number };
-  currentScreen?: "menu" | "worldMap" | "battle" | "recruitment";
+  currentScreen?: "menu" | "worldMap" | "battle" | "recruitment" | "lobby";
   currentBattle?: {
     mapId: string;
     enemies: string[]; // Monster IDs
